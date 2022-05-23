@@ -1,4 +1,4 @@
-package helloworld;
+package com.lucaspetrini.consult;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -20,6 +20,61 @@ Parameters:
       - uat
       - prod
 Resources:
+  RatingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions:
+        - AttributeName: sku
+          AttributeType: S
+        - AttributeName: year
+          AttributeType: N
+        - AttributeName: aggregated
+          AttributeType: N
+        - AttributeName: quantity
+          AttributeType: N
+        - AttributeName: date
+          AttributeType: N
+        - AttributeName: version
+          AttributeType: N
+      KeySchema: 
+        - AttributeName: sku
+          KeyType: HASH
+        - AttributeName: year
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      TableName: "ratings"
+  UserRatingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions:
+        - AttributeName: sku
+          AttributeType: S
+        - AttributeName: user
+          AttributeType: S
+        - AttributeName: rating
+          AttributeType: N
+        - AttributeName: date
+          AttributeType: N
+        - AttributeName: review
+          AttributeType: S
+        - AttributeName: version
+          AttributeType: N
+      KeySchema: 
+        - AttributeName: sku
+          KeyType: HASH
+        - AttributeName: user
+          KeyType: RANGE
+      LocalSecondaryIndex:
+        - IndexName: GSIRating
+          KeySchema:
+            - AttributeName: user
+              KeyType: HASH
+            - AttributeName: rating
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      TableName: "user_ratings"
   ConsultApi:
     Type: AWS::Serverless::HttpApi
     Properties:
