@@ -4,6 +4,7 @@ public class ServiceException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	private int statusCode;
+	// TODO add custom headers?
 	
 	public ServiceException(Exception e, int statusCode) {
 		super(e);

@@ -1,11 +1,11 @@
 package com.lucaspetrini.consult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ConsultHandlerTest {
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		// SQLite for DynamoDBLocal
 		System.setProperty("sqlite4java.library.path", "native-libs");

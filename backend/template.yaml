@@ -145,10 +145,10 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   ConsultRatingApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Description: "API Gateway endpoint URL for ConsultRating function"
     Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/ratings/{code}"
   ConsultUserRatingApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Description: "API Gateway endpoint URL for ConsultUserRating function"
     Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/users/{id}/ratings/{code}"
   ConsultGetRatingFunction:
     Description: "Get Rating Function ARN"

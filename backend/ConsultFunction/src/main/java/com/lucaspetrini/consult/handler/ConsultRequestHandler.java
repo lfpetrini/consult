@@ -1,16 +1,16 @@
 package com.lucaspetrini.consult.handler;
 
-import java.util.Map;
-
-import com.lucaspetrini.consult.request.GetUserRatingsRequest;
-import com.lucaspetrini.consult.request.PutUserRatingsRequest;
-import com.lucaspetrini.consult.response.GetUserRatingsResponse;
-import com.lucaspetrini.consult.response.PutUserRatingsResponse;
+import com.lucaspetrini.consult.request.GetUserRatingRequest;
+import com.lucaspetrini.consult.request.HttpRequest;
+import com.lucaspetrini.consult.request.PutUserRatingRequest;
+import com.lucaspetrini.consult.response.GetUserRatingResponse;
+import com.lucaspetrini.consult.response.HttpResponse;
+import com.lucaspetrini.consult.response.PutUserRatingResponse;
 
 public interface ConsultRequestHandler {
 
-	PutUserRatingsResponse handlePut(Map<String, String> headers, PutUserRatingsRequest putUserRatings);
+	HttpResponse<PutUserRatingResponse> handlePut(HttpRequest<PutUserRatingRequest> request);
 
-	GetUserRatingsResponse handleGet(Map<String, String> headers, GetUserRatingsRequest getUserRatings);
+	HttpResponse<GetUserRatingResponse> handleGet(HttpRequest<GetUserRatingRequest> request);
 
 }

@@ -1,5 +1,5 @@
 package com.lucaspetrini.consult.request;
 
-public class GetUserRatingsRequest {
+public class GetUserRatingRequest {
 
 }
