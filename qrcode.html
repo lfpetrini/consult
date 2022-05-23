@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>QR Code Demo</title>
+    <script type="text/javascript" src="html5-qrcode.min.js"></script>
+    <script type="text/javascript">
+          console.log('Creating scanner.');
+      function onScanSuccess(decodedText, decodedResult) {
+        // handle the scanned code as you like, for example:
+        console.log(`Code matched = ${decodedText}`, decodedResult);
+        document.getElementById("code").innerHTML = decodedText;
+      }
+
+      function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+        // for example:
+        console.warn(`Code scan error = ${error}`);
+        document.getElementById("code").innerHTML = 'Error';
+      }
+
+      window.onload = function() {
+        console.log('Creating scanner.');
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+          "reader",
+          { fps: 10, qrbox: {width: 250, height: 250} },
+          /* verbose= */ false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        let icon = document.getElementById('reader').children[0].getElementsByTagName('img')[0];
+        console.log(`Image: ${icon}`);
+        icon.remove();
+        let scanWithFile = document.getElementById('reader').children[2].children[0].children[1];
+        console.log(`Scan with file: ${scanWithFile}`);
+        scanWithFile.remove();
+    }
+    </script>
+  </head>
+  <body>
+    <div style="text-align: center;">
+      <div id="reader" style="width: 300px; display: inline-block;"></div>
+    </div>
+    <div id="code"></div>
+  </body>
+</html>
