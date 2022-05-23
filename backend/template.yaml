@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  consult
+
+  Sample SAM Template for consult
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 20
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Stage name (dev|qa|uat|prod).
+    AllowedValues:
+      - dev
+      - qa
+      - uat
+      - prod
+Resources:
+  ConsultApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+  ConsultGetRatingFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ConsultGetRatingFunction
+      Handler: com.lucaspetrini.consult.RatingsHandler::handleGet
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DYNAMO_REGION: eu-west-1
+          DYNAMO_NAME: ratingsdb
+      Events:
+        ConsultRatingGetApi:
+          Type: HttpApi
+          Properties:
+            Path: /ratings/{code}
+            Method: get
+            ApiId: ConsultApi
+  ConsultGetUserRatingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ConsultGetUserRatingFunction
+      Handler: com.lucaspetrini.consult.UserRatingsHandler::handleGet
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          DYNAMO_REGION: eu-west-1
+          DYNAMO_NAME: userratingsdb
+      Events:
+        ConsultUserRatingGetApi:
+          Type: HttpApi
+          Properties:
+            Path: /users/{id}/ratings/{code}
+            Method: get
+            ApiId: ConsultApi
+  ConsultPutUserRatingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ConsultPutUserRatingFunction
+      Handler: com.lucaspetrini.consult.UserRatingsHandler::handlePut
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          DYNAMO_REGION: eu-west-1
+          DYNAMO_NAME: userratingsdb
+      Events:
+        ConsultUserRatingPutApi:
+          Type: HttpApi
+          Properties:
+            Path: /users/{id}/ratings/{code}
+            Method: put
+            ApiId: ConsultApi
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ConsultRatingApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/ratings/{code}"
+  ConsultUserRatingApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/users/{id}/ratings/{code}"
+  ConsultGetRatingFunction:
+    Description: "Get Rating Function ARN"
+    Value: !GetAtt ConsultGetRatingFunction.Arn
+  ConsultGetRatingFunctionIamRole:
+    Description: "Implicit IAM Role created for Get Rating function"
+    Value: !GetAtt ConsultGetRatingFunctionRole.Arn
+  ConsultGetUserRatingFunction:
+    Description: "Get User Rating Function ARN"
+    Value: !GetAtt ConsultGetUserRatingFunction.Arn
+  ConsultGetUserRatingFunctionIamRole:
+    Description: "Implicit IAM Role created for Get User Rating function"
+    Value: !GetAtt ConsultGetUserRatingFunctionRole.Arn
+  ConsultPutUserRatingFunction:
+    Description: "Put User Rating Function ARN"
+    Value: !GetAtt ConsultPutUserRatingFunction.Arn
+  ConsultPutUserRatingFunctionIamRole:
+    Description: "Implicit IAM Role created for Put User Rating function"
+    Value: !GetAtt ConsultPutUserRatingFunctionRole.Arn
