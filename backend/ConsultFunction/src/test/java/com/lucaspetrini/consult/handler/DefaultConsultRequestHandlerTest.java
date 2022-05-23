@@ -21,13 +21,15 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.lucaspetrini.consult.dao.UserRatingDao;
 import com.lucaspetrini.consult.exception.ResourceNotFoundException;
 import com.lucaspetrini.consult.model.UserRating;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
+import com.lucaspetrini.consult.request.PutUserRatingRequest;
 import com.lucaspetrini.consult.response.GetUserRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
+import com.lucaspetrini.consult.response.PutUserRatingResponse;
+import com.lucaspetrini.consult.service.UserRatingService;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
@@ -43,6 +45,7 @@ public class DefaultConsultRequestHandlerTest {
 	private static final Integer RATING = 9;
 	private static final Long DATE = 5513564L;
 	private static final String REVIEW = "Good value but it lacks potatoes";
+	private static final Long VERSION = 3L;
 	
 	static {
 		USER_RATING = new UserRating();
@@ -51,47 +54,55 @@ public class DefaultConsultRequestHandlerTest {
 		USER_RATING.setRating(RATING);
 		USER_RATING.setDate(DATE);
 		USER_RATING.setReview(REVIEW);
+		USER_RATING.setVersion(VERSION);
 	}
 
 	private DefaultConsultRequestHandler handler;
-	private @Mock UserRatingDao dao;
+	private @Mock UserRatingService service;
 	private @Captor ArgumentCaptor<String> userIdCaptor;
 	private @Captor ArgumentCaptor<String> codeCaptor;
+	private @Captor ArgumentCaptor<UserRating> userRatingCaptor;
+	
+	/*************************************************************
+	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	 *          ~~~~~~~~~~~ TESTS FOR GET ~~~~~~~~~~~
+	 * /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+	 ************************************************************/
 	
 	@BeforeEach
 	public void setUp() {
 		handler = new DefaultConsultRequestHandler();
-		handler.setUserRatingDao(dao);
+		handler.setUserRatingService(service);
 	}
 
 	@Test
-	public void testGetBySkuAndUserCallDAOObject() {
+	public void testGetBySkuAndUserCallsUserRatingService() {
 		// given
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		Map<String, String> params = new HashMap<>();
 		params.put(ConsultConstants.PATH_PARAM_USER_ID, USER_ID_VALUE);
 		params.put(ConsultConstants.PATH_PARAM_CODE, CODE_VALUE);
 		request.setPathParams(params);
-		doReturn(USER_RATING).when(dao).getByUserIdAndCode(any(), any());
+		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 		
 		// when
 		handler.handleGet(request);
 		
 		// then
-		verify(dao).getByUserIdAndCode(userIdCaptor.capture(), codeCaptor.capture());
+		verify(service).getByUserIdAndCode(userIdCaptor.capture(), codeCaptor.capture());
 		assertEquals(USER_ID_VALUE, userIdCaptor.getValue());
 		assertEquals(CODE_VALUE, codeCaptor.getValue());
 	}
 
 	@Disabled("To be implemented later")
 	@Test
-	public void testGetAllByUserCallDAOObjectWithoutLimitsWhenLimitIsNotProvided() {
+	public void testGetAllByUserCallsUserRatingServiceWithoutLimitsWhenLimitIsNotProvided() {
 		fail("Not implemented.");
 	}
 
 	@Disabled("To be implemented later")
 	@Test
-	public void testGetAllByUserCallDAOObjectWithLimitWhenLimitIsProvided() {
+	public void testGetAllByUserCallsUserRatingServiceWithLimitWhenLimitIsProvided() {
 		fail("Not implemented.");
 	}
 
@@ -102,11 +113,11 @@ public class DefaultConsultRequestHandlerTest {
 	}
 
 	@Test
-	public void testGetResponseReturnedMatchesEntityReturnedByDAO() {
+	public void testGetResponseReturnedMatchesEntityReturnedByUserRatingService() {
 		// given
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(dao).getByUserIdAndCode(any(), any());
+		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 		
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
@@ -125,7 +136,7 @@ public class DefaultConsultRequestHandlerTest {
 		// given
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(dao).getByUserIdAndCode(any(), any());
+		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 		
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
@@ -139,7 +150,7 @@ public class DefaultConsultRequestHandlerTest {
 		// given
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(dao).getByUserIdAndCode(any(), any());
+		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 		
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
@@ -151,10 +162,9 @@ public class DefaultConsultRequestHandlerTest {
 	@Test
 	public void testGetResponseThrowsResourceNotFoundExceptionWhenEntityIsNotFound() {
 		// given
-		// given
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
-		doReturn(null).when(dao).getByUserIdAndCode(any(), any());
+		doReturn(null).when(service).getByUserIdAndCode(any(), any());
 		
 		// then
 		assertThrows(ResourceNotFoundException.class, () -> { 
@@ -162,5 +172,119 @@ public class DefaultConsultRequestHandlerTest {
 			handler.handleGet(request);
 		});
 	}
+	
+	/*************************************************************
+	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	 *          ~~~~~~~~~~~ TESTS FOR PUT ~~~~~~~~~~~
+	 * /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+	 ************************************************************/
 
+	@Test
+	public void testPutCallsUserRatingService() {
+		// given
+		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
+		Map<String, String> params = new HashMap<>();
+		PutUserRatingRequest requestBody = new PutUserRatingRequest();
+		requestBody.setDate(DATE);
+		requestBody.setRating(RATING);
+		requestBody.setReview(REVIEW);
+		request.setBody(requestBody);
+		params.put(ConsultConstants.PATH_PARAM_USER_ID, USER_ID_VALUE);
+		params.put(ConsultConstants.PATH_PARAM_CODE, CODE_VALUE);
+		request.setPathParams(params);
+		doReturn(USER_RATING).when(service).put(any());
+		
+		// when
+		handler.handlePut(request);
+		
+		// then
+		verify(service).put(userRatingCaptor.capture());
+		UserRating rating = userRatingCaptor.getValue();
+		assertEquals(USER_ID_VALUE, rating.getUser());
+		assertEquals(CODE_VALUE, rating.getSku());
+		assertEquals(DATE, rating.getDate());
+		assertEquals(RATING, rating.getRating());
+		assertEquals(REVIEW, rating.getReview());
+	}
+
+	@Test
+	public void testPuttResponseReturnedMatchesEntityReturnedByUserRatingService() {
+		// given
+		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
+		request.setBody(new PutUserRatingRequest());
+		request.setPathParams(Collections.emptyMap());
+		doReturn(USER_RATING).when(service).put(any());
+		
+		// when
+		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
+		
+		// then
+		PutUserRatingResponse responseBody = response.getBody();
+		assertEquals(CODE_VALUE, responseBody.getCode());
+		assertEquals(USER_ID_VALUE, responseBody.getUser());
+		assertEquals(RATING, responseBody.getRating());
+		assertEquals(DATE, responseBody.getDate());
+		assertEquals(REVIEW, responseBody.getReview());
+		assertEquals(VERSION, responseBody.getVersion());
+	}
+
+	@Test
+	public void testPutResponseReturns200WhenEntityIsCreated() {
+		// given
+		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
+		request.setBody(new PutUserRatingRequest());
+		request.setPathParams(Collections.emptyMap());
+		doReturn(USER_RATING).when(service).put(any());
+		
+		// when
+		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
+		
+		// then
+		assertEquals(200, response.getStatusCode());
+	}
+
+	@Test
+	public void testPutResponseReturnsNoCustomHeadersWhenEntityIsCreated() {
+		// given
+		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
+		request.setBody(new PutUserRatingRequest());
+		request.setPathParams(Collections.emptyMap());
+		doReturn(USER_RATING).when(service).put(any());
+		
+		// when
+		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
+		
+		// then
+		assertNull(response.getHeaders());
+	}
+
+	@Disabled("To be implemented later")
+	@Test
+	public void testPutDoesNotCallUserRatingServiceIfRequestIsNotValid() {
+		fail("Not implemented.");
+	}
+
+	@Disabled("To be implemented later  (probably not, since it should be handled by Cognito)")
+	@Test
+	public void testPutDoesNotCallUserRatingServiceIfUserIdIsNotAuthenticated() {
+		fail("Not implemented.");
+	}
+
+	@Disabled("To be implemented later")
+	@Test
+	public void testPutDoesNotCallUserRatingServiceIfUserIdIsNotAuthorised() {
+		fail("Not implemented.");
+	}
+
+	@Disabled("To be implemented later  (probably not, since it should be handled by Cognito)")
+	@Test
+	public void testPutReturns401IfUserIdIsNotAuthenticated() {
+		fail("Not implemented.");
+	}
+
+	@Disabled("To be implemented later")
+	@Test
+	public void testPutReturns403IfUserIdIsNotAuthorised() {
+		fail("Not implemented.");
+	}
 }

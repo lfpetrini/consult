@@ -15,8 +15,10 @@ public class JsonObjectMapperTest {
 	private static final String SKU = "SKU123";
 	private static final String USER = "mrpickles";
 	private static final Integer RATING = 3;
-	private static final String SERIALISED_PUT_REQUEST = "{'sku':'SKU123','user':'mrpickles','rating':3}".replace("'", "\"");
-	private static final String DESERIALISED_GET_RESPONSE = "{'sku':'SKU123','user':'mrpickles','rating':3}".replace("'", "\"");
+	private static final String REVIEW = "Good";
+	private static final String SERIALISED_PUT_REQUEST = "{'rating':3,'date':9941,'review':'Good'}".replace("'", "\"");
+	private static final String DESERIALISED_GET_RESPONSE = "{'sku':'SKU123','user':'mrpickles','rating':3,'date':9941,'review':'Good'}".replace("'", "\"");
+	private static final Long DATE = 9941L;
 	private JsonObjectMapper mapper;
 
 	@BeforeEach
@@ -27,9 +29,9 @@ public class JsonObjectMapperTest {
 	@Test
 	public void testPutRequestIsSerialised() {
 		PutUserRatingRequest request = new PutUserRatingRequest();
-		request.setSku(SKU);
-		request.setUser(USER);
 		request.setRating(RATING);
+		request.setDate(DATE);
+		request.setReview(REVIEW);
 		
 		String serialisedRequest = mapper.serialise(request);
 		
@@ -43,6 +45,8 @@ public class JsonObjectMapperTest {
 		assertEquals(SKU, response.getSku());
 		assertEquals(USER, response.getUser());
 		assertEquals(RATING, response.getRating());
+		assertEquals(DATE, response.getDate());
+		assertEquals(REVIEW, response.getReview());
 	}
 
 }

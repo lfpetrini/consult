@@ -11,6 +11,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.lucaspetrini.consult.exception.RequestDeserialisationException;
 import com.lucaspetrini.consult.exception.ServiceException;
 import com.lucaspetrini.consult.exception.UnsupportedContentTypeException;
+import com.lucaspetrini.consult.exception.UnsupportedMethodException;
 import com.lucaspetrini.consult.handler.ConsultRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
@@ -50,7 +51,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 				response = handleGet(input, context);
 				break;
 			default:
-				ServiceException invalidMethodException = new ServiceException("Unsupported HTTP method " + method + ".", 400);
+				UnsupportedMethodException invalidMethodException = new UnsupportedMethodException(method);
 				throw invalidMethodException ; // change to a different ServiceException
 			}
 			responseBody = objectMapper.serialise(response.getBody());
@@ -59,7 +60,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 			return buildErrorResponse(e);
 		}
 		Map<String, String> responseHeaders = new HashMap<>();
-		responseHeaders.put("Content-Type", "application/json");
+		responseHeaders.put(ConsultConstants.HEADER_CONTENT_TYPE, ConsultConstants.CONTENT_TYPE_JSON);
 		APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
 		if(response != null) {
 			if(response.getHeaders() != null) {

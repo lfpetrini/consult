@@ -45,26 +45,27 @@ Resources:
       TableName: "ratings"
   UserRatingsTable:
     Type: AWS::DynamoDB::Table
-    Properties: 
+    Properties:
       AttributeDefinitions:
         - AttributeName: sku
           AttributeType: S
+        # Most recent reviews will have user starting with 'v0-', this will make sorting a lot easier and cheaper
         - AttributeName: user
           AttributeType: S
         - AttributeName: rating
           AttributeType: N
-        - AttributeName: date
-          AttributeType: N
-        - AttributeName: review
-          AttributeType: S
-        - AttributeName: version
-          AttributeType: N
+        #- AttributeName: date
+        #  AttributeType: N
+        #- AttributeName: review
+        #  AttributeType: S
+        #- AttributeName: version
+        #  AttributeType: N
       KeySchema: 
         - AttributeName: sku
           KeyType: HASH
         - AttributeName: user
           KeyType: RANGE
-      LocalSecondaryIndex:
+      GlobalSecondaryIndex:
         - IndexName: GSIRating
           KeySchema:
             - AttributeName: user
@@ -72,7 +73,11 @@ Resources:
             - AttributeName: rating
               KeyType: RANGE
           Projection:
-            ProjectionType: ALL
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - sku
+              - date
+              - review
       BillingMode: PAY_PER_REQUEST
       TableName: "user_ratings"
   ConsultApi:
