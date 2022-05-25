@@ -42,7 +42,7 @@ public class DefaultConsultRequestHandlerTest {
 	private static final String USER_ID_VALUE = "123";
 	private static final String CODE_VALUE = "567";
 	private static final UserRating USER_RATING;
-	private static final Integer RATING = 9;
+	private static final Long RATING = 9L;
 	private static final Long DATE = 5513564L;
 	private static final String REVIEW = "Good value but it lacks potatoes";
 	private static final Long VERSION = 3L;

@@ -1,5 +1,11 @@
 package com.lucaspetrini.consult.model;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+
 /**
  * A user rating consists of the following properties:
  * 
@@ -12,10 +18,11 @@ package com.lucaspetrini.consult.model;
  * <li>the version of the user rating</li>
  * </ul>
  */
+@DynamoDbBean
 public class UserRating {
 	private String sku;
 	private String user;
-	private Integer rating;
+	private Long rating;
 	private Long date;
 	private String review;
 	private Long version;
@@ -24,6 +31,7 @@ public class UserRating {
 		this.sku = sku;
 	}
 
+	@DynamoDbPartitionKey
 	public String getSku() {
 		return sku;
 	}
@@ -32,15 +40,18 @@ public class UserRating {
 		this.user = user;
 	}
 
+	@DynamoDbSortKey
+	@DynamoDbSecondaryPartitionKey(indexNames="GSIRating")
 	public String getUser() {
 		return user;
 	}
 
-	public void setRating(Integer rating) {
+	public void setRating(Long rating) {
 		this.rating = rating;
 	}
 
-	public Integer getRating() {
+	@DynamoDbSecondarySortKey(indexNames="GSIRating")
+	public Long getRating() {
 		return rating;
 	}
 

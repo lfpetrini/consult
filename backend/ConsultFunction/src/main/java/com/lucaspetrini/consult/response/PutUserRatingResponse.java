@@ -6,7 +6,7 @@ package com.lucaspetrini.consult.response;
 public class PutUserRatingResponse {
 	private String code;
 	private String user;
-	private Integer rating;
+	private Long rating;
 	private Long date;
 	private String review;
 	private Long version;
@@ -27,11 +27,11 @@ public class PutUserRatingResponse {
 		return user;
 	}
 
-	public void setRating(Integer rating) {
+	public void setRating(Long rating) {
 		this.rating = rating;
 	}
 
-	public Integer getRating() {
+	public Long getRating() {
 		return rating;
 	}
 

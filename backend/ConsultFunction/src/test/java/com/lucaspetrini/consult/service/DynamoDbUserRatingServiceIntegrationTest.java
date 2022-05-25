@@ -1,6 +1,10 @@
 package com.lucaspetrini.consult.service;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,8 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.lucaspetrini.consult.exception.DatabaseException;
+import com.lucaspetrini.consult.model.UserRating;
 import com.lucaspetrini.consult.utils.DynamoDBExtension;
 
 import software.amazon.awssdk.regions.Region;
@@ -26,6 +33,7 @@ import software.amazon.awssdk.services.dynamodb.model.BatchWriteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.BatchWriteItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
@@ -40,7 +48,7 @@ import software.amazon.awssdk.services.dynamodb.model.WriteRequest;
 @ExtendWith({ MockitoExtension.class, DynamoDBExtension.class })
 class DynamoDbUserRatingServiceIntegrationTest {
 
-	private static final String TABLE_NAME_USER_RATING = "user_rating";
+	private static final String TABLE_NAME_USER_RATING = "user_ratings";
 	private static final String USER_RATING_SKU = "sku";
 	private static final String USER_RATING_USER = "user";
 	private static final String USER_RATING_RATING = "rating";
@@ -49,6 +57,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	private static final String USER_RATING_VERSION = "version";
 	private static final String GSI_RATING = "GSIRating";
 	private static final String SKU_VALUE = "1321123";
+	private static final String USER_VALUE_NO_VERSION = "122151";
 	private static final String USER_VALUE_1 = "v1-122151";
 	private static final Long VERSION_VALUE_1 = 1L;
 	private static final String REVIEW_VALUE_1 = "Terrible";
@@ -82,7 +91,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		client = DynamoDbAsyncClient.builder().region(Region.US_EAST_1)
 				.endpointOverride(URI.create("http://localhost:" + DynamoDBExtension.SERVER_PORT)).build();
 
-		service = new DynamoDbUserRatingService().withDynamoDbAsyncClient(client);
+		service = new DynamoDbUserRatingService(client).withUserRatingsTable(TABLE_NAME_USER_RATING);
 
 		createTableUserRating();
 		pupulateTableUserRating();
@@ -145,17 +154,58 @@ class DynamoDbUserRatingServiceIntegrationTest {
 
 	@Test
 	void testGetUserReturnsLatestVersionFromTable() {
-		fail("Not yet implemented");
+		// given table is populated with the initial static data
+		
+		// when
+		UserRating rating = service.getByUserIdAndCode(USER_VALUE_NO_VERSION, SKU_VALUE);
+		
+		// then
+		assertEquals(SKU_VALUE, rating.getSku());
+		assertEquals(USER_VALUE_3, rating.getUser());
+		assertEquals(DATE_VALUE_3, rating.getDate());
+		assertEquals(RATING_VALUE_3, rating.getRating());
+		assertEquals(REVIEW_VALUE_3, rating.getReview());
+		assertEquals(VERSION_VALUE_3, rating.getVersion());
 	}
 
 	@Test
 	void testDatabaseExceptionIsThrownOnGetItemException() {
-		fail("Not yet implemented");
+		// given
+		DynamoDbAsyncClient mockClient = Mockito.mock(DynamoDbAsyncClient.class);
+		service = new DynamoDbUserRatingService(mockClient).withUserRatingsTable(TABLE_NAME_USER_RATING);
+		doThrow(new RuntimeException()).when(mockClient).getItem(Mockito.<GetItemRequest>any());
+		
+		// then
+		assertThrows(DatabaseException.class, () -> {
+			// when
+			service.getByUserIdAndCode(USER_VALUE_NO_VERSION, SKU_VALUE);
+		});
+	}
+
+	@Test
+	void testDatabaseExceptionIsThrownOnGetItemFromCompletableFutureException() {
+		// given
+		DynamoDbAsyncClient mockClient = Mockito.mock(DynamoDbAsyncClient.class);
+		service = new DynamoDbUserRatingService(mockClient).withUserRatingsTable(TABLE_NAME_USER_RATING);
+		CompletableFuture<UserRating> future = CompletableFuture.failedFuture(new RuntimeException());
+		doReturn(future).when(mockClient).getItem(Mockito.<GetItemRequest>any());
+		
+		// then
+		assertThrows(DatabaseException.class, () -> {
+			// when
+			service.getByUserIdAndCode(USER_VALUE_NO_VERSION, SKU_VALUE);
+		});
 	}
 
 	@Test
 	void testGetUserReturnsNullIfNoItemIsFound() {
-		fail("Not yet implemented");
+		// given table is populated with the initial static data
+		
+		// when
+		UserRating rating = service.getByUserIdAndCode("xyz", "3");
+		
+		// then
+		assertNull(rating);
 	}
 
 }

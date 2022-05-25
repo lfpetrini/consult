@@ -4,7 +4,7 @@ public class GetUserRatingResponse {
 
 	private String sku;
 	private String user;
-	private Integer rating;
+	private Long rating;
 	private Long date;
 	private String review;
 
@@ -24,11 +24,11 @@ public class GetUserRatingResponse {
 		return user;
 	}
 
-	public void setRating(Integer rating) {
+	public void setRating(Long rating) {
 		this.rating = rating;
 	}
 	
-	public Integer getRating() {
+	public Long getRating() {
 		return rating;
 	}
 	
