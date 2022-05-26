@@ -3,7 +3,7 @@ package com.lucaspetrini.consult.service;
 import com.lucaspetrini.consult.model.UserRating;
 
 /**
- * Service to handle operations on {@link UserRating UserRatings}
+ * Service to handle persistence for {@link UserRating user ratings}.
  */
 public interface UserRatingService {
 

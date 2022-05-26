@@ -90,7 +90,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 		String errorMessage = ConsultConstants.UNHANDLED_EXCEPTION_ERROR_DESC;
 		int statusCode = 500;
 		if(e instanceof ServiceException) {
-			errorMessage = ((ServiceException)e).getMessage();
+			errorMessage = ((ServiceException)e).getShortDescription();
 			statusCode = ((ServiceException)e).getStatusCode();
 		}
 		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();

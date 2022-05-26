@@ -1,5 +1,8 @@
 package com.lucaspetrini.consult.response;
 
+/**
+ * GET response body for a user rating request.
+ */
 public class GetUserRatingResponse {
 
 	private String sku;
@@ -11,7 +14,7 @@ public class GetUserRatingResponse {
 	public void setSku(String sku) {
 		this.sku = sku;
 	}
-	
+
 	public String getSku() {
 		return sku;
 	}
@@ -19,7 +22,7 @@ public class GetUserRatingResponse {
 	public void setUser(String user) {
 		this.user = user;
 	}
-	
+
 	public String getUser() {
 		return user;
 	}
@@ -27,11 +30,11 @@ public class GetUserRatingResponse {
 	public void setRating(Long rating) {
 		this.rating = rating;
 	}
-	
+
 	public Long getRating() {
 		return rating;
 	}
-	
+
 	public void setDate(Long date) {
 		this.date = date;
 	}
@@ -39,7 +42,7 @@ public class GetUserRatingResponse {
 	public Long getDate() {
 		return date;
 	}
-	
+
 	public void setReview(String review) {
 		this.review = review;
 	}

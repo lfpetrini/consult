@@ -1,7 +1,5 @@
 package com.lucaspetrini.consult.service;
 
-import java.util.concurrent.ExecutionException;
-
 import com.lucaspetrini.consult.exception.DatabaseException;
 import com.lucaspetrini.consult.model.UserRating;
 
@@ -11,6 +9,10 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
+/**
+ * Implementation of {@link UserRatingService} that stores and retrieves {@link UserRating user ratings}
+ * from Amazon DynamoDB.
+ */
 public class DynamoDbUserRatingService implements UserRatingService {
 	private static final String VERSION_PREFIX = "v0-";
 	private static final String USER_RATINGS = "user_ratings";
@@ -18,11 +20,21 @@ public class DynamoDbUserRatingService implements UserRatingService {
 	private DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient;
 	private String userRatingsTableName;
 	private DynamoDbAsyncTable<UserRating> userRatingsTable;
-	
+
+	/**
+	 * Implementation of {@link UserRatingService} that stores and retrieves {@link UserRating user ratings}
+	 * from Amazon DynamoDB.
+	 */
 	public DynamoDbUserRatingService() {
 		initDefaults(null);
 	}
-	
+
+	/**
+	 * Implementation of {@link UserRatingService} that stores and retrieves {@link UserRating user ratings}
+	 * from Amazon DynamoDB.
+	 * 
+	 * @param dynamoDbAsyncClient underlying {@link DynamoDbAsyncClient}.
+	 */
 	public DynamoDbUserRatingService(DynamoDbAsyncClient dynamoDbAsyncClient) {
 		initDefaults(dynamoDbAsyncClient);
 	}
@@ -37,6 +49,12 @@ public class DynamoDbUserRatingService implements UserRatingService {
 		withUserRatingsTable(USER_RATINGS);
 	}
 
+	/**
+	 * Set the table name to be used for {@link UserRatings user ratings}.
+	 * 
+	 * @param userRatingsTable table name.
+	 * @return this {@link DynamoDbUserRatingService} instance.
+	 */
 	public DynamoDbUserRatingService withUserRatingsTable(String userRatingsTable) {
 		this.userRatingsTableName = userRatingsTable;
 		mapTables(dynamoDbEnhancedAsyncClient);

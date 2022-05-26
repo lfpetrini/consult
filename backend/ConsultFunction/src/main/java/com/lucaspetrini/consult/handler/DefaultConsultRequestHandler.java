@@ -13,6 +13,10 @@ import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.service.UserRatingService;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
+/**
+ * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
+ * {@link UserRatingService}.
+ */
 public class DefaultConsultRequestHandler implements ConsultRequestHandler {
 
 	private UserRatingService userRatingService;

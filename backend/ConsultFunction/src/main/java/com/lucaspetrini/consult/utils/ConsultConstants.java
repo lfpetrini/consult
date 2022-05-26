@@ -1,5 +1,8 @@
 package com.lucaspetrini.consult.utils;
 
+/**
+ * Constants for the application.
+ */
 public final class ConsultConstants {
 	public static final String HTTP_METHOD_PUT = "PUT";
 	public static final String HTTP_METHOD_GET = "GET";

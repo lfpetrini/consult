@@ -1,7 +1,7 @@
 package com.lucaspetrini.consult.response;
 
 /**
- * Response body for a user rating request.
+ * PUT response body for a user rating request.
  */
 public class PutUserRatingResponse {
 	private String code;
