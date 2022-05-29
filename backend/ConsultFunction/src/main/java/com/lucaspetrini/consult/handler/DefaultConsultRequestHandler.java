@@ -3,7 +3,6 @@ package com.lucaspetrini.consult.handler;
 import java.util.Map;
 
 import com.lucaspetrini.consult.exception.ResourceNotFoundException;
-import com.lucaspetrini.consult.model.UserRating;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
 import com.lucaspetrini.consult.request.PutUserRatingRequest;
@@ -11,6 +10,7 @@ import com.lucaspetrini.consult.response.GetUserRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
 import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.service.UserRatingService;
+import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**

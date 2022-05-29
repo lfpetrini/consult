@@ -14,7 +14,7 @@ public class RequestDeserialisationException extends ServiceException {
 	public RequestDeserialisationException(Throwable cause) {
 		super(cause, "Cannot deserialise request body.", 400);
 	}
-	
+
 	/**
 	 * Request deserialisation exception.
 	 * 
@@ -23,7 +23,7 @@ public class RequestDeserialisationException extends ServiceException {
 	public RequestDeserialisationException(String message) {
 		super(message, 400);
 	}
-	
+
 	/**
 	 * Request deserialisation exception.
 	 * 

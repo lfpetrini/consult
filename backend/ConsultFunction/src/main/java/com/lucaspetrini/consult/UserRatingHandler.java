@@ -108,7 +108,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 			// log e
 			throw new RequestDeserialisationException(e);
 		}
-		
+
 		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
 		request.setBody(requestBody);
 		request.setHeaders(input.getHeaders());
@@ -123,7 +123,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 			// log e
 			throw new RequestDeserialisationException(e);
 		}
-		
+
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setBody(requestBody);
 		request.setHeaders(input.getHeaders());

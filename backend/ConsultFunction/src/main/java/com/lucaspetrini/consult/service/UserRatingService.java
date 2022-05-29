@@ -1,6 +1,6 @@
 package com.lucaspetrini.consult.service;
 
-import com.lucaspetrini.consult.model.UserRating;
+import com.lucaspetrini.consult.service.model.UserRating;
 
 /**
  * Service to handle persistence for {@link UserRating user ratings}.

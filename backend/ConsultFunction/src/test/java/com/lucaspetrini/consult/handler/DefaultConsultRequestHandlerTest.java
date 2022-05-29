@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.lucaspetrini.consult.exception.ResourceNotFoundException;
-import com.lucaspetrini.consult.model.UserRating;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
 import com.lucaspetrini.consult.request.PutUserRatingRequest;
@@ -30,6 +29,7 @@ import com.lucaspetrini.consult.response.GetUserRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
 import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.service.UserRatingService;
+import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
@@ -38,7 +38,7 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
  */
 @ExtendWith(MockitoExtension.class)
 public class DefaultConsultRequestHandlerTest {
-	
+
 	private static final String USER_ID_VALUE = "123";
 	private static final String CODE_VALUE = "567";
 	private static final UserRating USER_RATING;
@@ -46,7 +46,7 @@ public class DefaultConsultRequestHandlerTest {
 	private static final Long DATE = 5513564L;
 	private static final String REVIEW = "Good value but it lacks potatoes";
 	private static final Long VERSION = 3L;
-	
+
 	static {
 		USER_RATING = new UserRating();
 		USER_RATING.setSku(CODE_VALUE);
@@ -62,13 +62,13 @@ public class DefaultConsultRequestHandlerTest {
 	private @Captor ArgumentCaptor<String> userIdCaptor;
 	private @Captor ArgumentCaptor<String> codeCaptor;
 	private @Captor ArgumentCaptor<UserRating> userRatingCaptor;
-	
+
 	/*************************************************************
 	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	 *          ~~~~~~~~~~~ TESTS FOR GET ~~~~~~~~~~~
 	 * /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 	 ************************************************************/
-	
+
 	@BeforeEach
 	public void setUp() {
 		handler = new DefaultConsultRequestHandler();
@@ -84,10 +84,10 @@ public class DefaultConsultRequestHandlerTest {
 		params.put(ConsultConstants.PATH_PARAM_CODE, CODE_VALUE);
 		request.setPathParams(params);
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
-		
+
 		// when
 		handler.handleGet(request);
-		
+
 		// then
 		verify(service).getByUserIdAndCode(userIdCaptor.capture(), codeCaptor.capture());
 		assertEquals(USER_ID_VALUE, userIdCaptor.getValue());
@@ -118,10 +118,10 @@ public class DefaultConsultRequestHandlerTest {
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
-		
+
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
-		
+
 		// then
 		GetUserRatingResponse responseBody = response.getBody();
 		assertEquals(CODE_VALUE, responseBody.getSku());
@@ -137,10 +137,10 @@ public class DefaultConsultRequestHandlerTest {
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
-		
+
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
-		
+
 		// then
 		assertEquals(200, response.getStatusCode());
 	}
@@ -151,10 +151,10 @@ public class DefaultConsultRequestHandlerTest {
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
-		
+
 		// when
 		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
-		
+
 		// then
 		assertNull(response.getHeaders());
 	}
@@ -165,14 +165,14 @@ public class DefaultConsultRequestHandlerTest {
 		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
 		request.setPathParams(Collections.emptyMap());
 		doReturn(null).when(service).getByUserIdAndCode(any(), any());
-		
+
 		// then
 		assertThrows(ResourceNotFoundException.class, () -> { 
 			// when
 			handler.handleGet(request);
 		});
 	}
-	
+
 	/*************************************************************
 	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	 *          ~~~~~~~~~~~ TESTS FOR PUT ~~~~~~~~~~~
@@ -193,10 +193,10 @@ public class DefaultConsultRequestHandlerTest {
 		params.put(ConsultConstants.PATH_PARAM_CODE, CODE_VALUE);
 		request.setPathParams(params);
 		doReturn(USER_RATING).when(service).put(any());
-		
+
 		// when
 		handler.handlePut(request);
-		
+
 		// then
 		verify(service).put(userRatingCaptor.capture());
 		UserRating rating = userRatingCaptor.getValue();
@@ -214,10 +214,10 @@ public class DefaultConsultRequestHandlerTest {
 		request.setBody(new PutUserRatingRequest());
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).put(any());
-		
+
 		// when
 		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-		
+
 		// then
 		PutUserRatingResponse responseBody = response.getBody();
 		assertEquals(CODE_VALUE, responseBody.getCode());
@@ -235,10 +235,10 @@ public class DefaultConsultRequestHandlerTest {
 		request.setBody(new PutUserRatingRequest());
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).put(any());
-		
+
 		// when
 		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-		
+
 		// then
 		assertEquals(200, response.getStatusCode());
 	}
@@ -250,10 +250,10 @@ public class DefaultConsultRequestHandlerTest {
 		request.setBody(new PutUserRatingRequest());
 		request.setPathParams(Collections.emptyMap());
 		doReturn(USER_RATING).when(service).put(any());
-		
+
 		// when
 		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-		
+
 		// then
 		assertNull(response.getHeaders());
 	}

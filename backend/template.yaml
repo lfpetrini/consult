@@ -26,21 +26,28 @@ Resources:
       AttributeDefinitions:
         - AttributeName: sku
           AttributeType: S
-        - AttributeName: year
-          AttributeType: N
-        - AttributeName: aggregated
-          AttributeType: N
-        - AttributeName: quantity
+        - AttributeName: version
           AttributeType: N
         - AttributeName: date
           AttributeType: N
-        - AttributeName: version
-          AttributeType: N
+        #- AttributeName: aggregated
+        #  AttributeType: N
+        #- AttributeName: quantity
+        #  AttributeType: N
       KeySchema: 
         - AttributeName: sku
           KeyType: HASH
-        - AttributeName: year
+        - AttributeName: version
           KeyType: RANGE
+      LocalSecondaryIndex:
+        - IndexName: LSIDate
+          KeySchema:
+            - AttributeName: sku
+              KeyType: HASH
+            - AttributeName: date
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
       BillingMode: PAY_PER_REQUEST
       TableName: "ratings"
   UserRatingsTable:
@@ -77,7 +84,9 @@ Resources:
             NonKeyAttributes:
               - sku
               - date
-              - review
+              # should review be stored in this index? Would it be better to have it available on rare occasions,
+              # or save some space but make extra get requests if we need it?
+              #- review
       BillingMode: PAY_PER_REQUEST
       TableName: "user_ratings"
   ConsultApi:

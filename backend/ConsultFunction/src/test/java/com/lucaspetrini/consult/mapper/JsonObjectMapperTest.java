@@ -32,9 +32,9 @@ public class JsonObjectMapperTest {
 		request.setRating(RATING);
 		request.setDate(DATE);
 		request.setReview(REVIEW);
-		
+
 		String serialisedRequest = mapper.serialise(request);
-		
+
 		assertEquals(SERIALISED_PUT_REQUEST, serialisedRequest);
 	}
 

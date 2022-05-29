@@ -56,7 +56,7 @@ public class ServiceException extends RuntimeException {
 	public int getStatusCode() {
 		return statusCode;
 	}
-	
+
 	/**
 	 * Meaningful, user-friendly description about the issue.
 	 * 

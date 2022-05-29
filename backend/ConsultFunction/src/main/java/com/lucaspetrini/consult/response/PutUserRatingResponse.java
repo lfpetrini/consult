@@ -50,11 +50,11 @@ public class PutUserRatingResponse {
 	public String getReview() {
 		return review;
 	}
-	
+
 	public void setVersion(Long version) {
 		this.version = version;
 	}
-	
+
 	public Long getVersion() {
 		return version;
 	}

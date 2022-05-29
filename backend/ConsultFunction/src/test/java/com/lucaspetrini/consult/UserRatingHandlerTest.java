@@ -60,7 +60,7 @@ public class UserRatingHandlerTest {
 	private @Captor ArgumentCaptor<HttpRequest<PutUserRatingRequest>> putUserRatingRequestCaptor;
 	private @Captor ArgumentCaptor<HttpRequest<GetUserRatingRequest>> getUserRatingRequestCaptor;
 	private APIGatewayProxyRequestEvent input;
-	
+
 	@BeforeEach
 	public void setUp() {
 		//System.setProperty("sqlite4java.library.path", "native-libs"); // DynamoDb only
@@ -100,7 +100,7 @@ public class UserRatingHandlerTest {
 		input = createInput("PUT", null, "{}");
 		PutUserRatingRequest putUserRating = new PutUserRatingRequest();
 		doReturn(putUserRating).when(objectMapper).deserialise(any(String.class), ArgumentMatchers.<Class<PutUserRatingRequest>>any());
-		
+
 		// when
 		handler.handleRequest(input, context);
 
@@ -116,7 +116,7 @@ public class UserRatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		GetUserRatingRequest getUserRating = new GetUserRatingRequest();
 		doReturn(getUserRating).when(objectMapper).deserialise(any(String.class), ArgumentMatchers.<Class<GetUserRatingRequest>>any());
-		
+
 		// when
 		handler.handleRequest(input, context);
 
@@ -133,7 +133,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
 		doReturn(response).when(requestHandler).handleGet(any());
-		
+
 		// when
 		handler.handleRequest(input, context);
 
@@ -148,7 +148,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<PutUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_PUT_RESPONSE);
 		doReturn(response).when(requestHandler).handlePut(any());
-		
+
 		// when
 		handler.handleRequest(input, context);
 
@@ -160,7 +160,7 @@ public class UserRatingHandlerTest {
 	public void testNullResponseReturnsServerError_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -189,7 +189,7 @@ public class UserRatingHandlerTest {
 	public void testNullResponseReturnsServerError_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -206,7 +206,7 @@ public class UserRatingHandlerTest {
 		response.setBody(VALID_PUT_RESPONSE);
 		doReturn(response).when(requestHandler).handlePut(any());
 		doReturn(VALID_PUT_RESPONSE_BODY).when(objectMapper).serialise(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -222,7 +222,7 @@ public class UserRatingHandlerTest {
 		response.setHeaders(null);
 		response.setStatusCode(200);
 		doReturn(response).when(requestHandler).handleGet(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -240,7 +240,7 @@ public class UserRatingHandlerTest {
 		response.setHeaders(null);
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandler).handlePut(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -258,7 +258,7 @@ public class UserRatingHandlerTest {
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandler).handlePut(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -280,7 +280,7 @@ public class UserRatingHandlerTest {
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);		response.setHeaders(headers);
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandler).handlePut(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -299,7 +299,7 @@ public class UserRatingHandlerTest {
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandler).handleGet(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -322,7 +322,7 @@ public class UserRatingHandlerTest {
 		response.setHeaders(headers);
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandler).handleGet(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -341,7 +341,7 @@ public class UserRatingHandlerTest {
 		// given
 		input = createInput("GET", null, "{}");
 		doThrow(new RuntimeException()).when(objectMapper).deserialise(any(), any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -357,7 +357,7 @@ public class UserRatingHandlerTest {
 		// given
 		input = createInput("PUT", null, "{}");
 		doThrow(new RuntimeException()).when(objectMapper).deserialise(any(), any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -375,7 +375,7 @@ public class UserRatingHandlerTest {
 		response.setBody(VALID_GET_RESPONSE);
 		doReturn(response).when(requestHandler).handleGet(any());
 		doThrow(new RuntimeException()).when(objectMapper).serialise(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
@@ -392,7 +392,7 @@ public class UserRatingHandlerTest {
 		input = createInput("PUT", null, "{}");
 		doReturn(new HttpResponse<PutUserRatingResponse>()).when(requestHandler).handlePut(any());
 		doThrow(new RuntimeException()).when(objectMapper).serialise(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -408,7 +408,7 @@ public class UserRatingHandlerTest {
 		// given
 		input = createInput("PUT", null, "{}");
 		doThrow(new RuntimeException()).when(requestHandler).handlePut(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -423,7 +423,7 @@ public class UserRatingHandlerTest {
 		// given
 		input = createInput("GET", null, "{}");
 		doThrow(new RuntimeException()).when(requestHandler).handleGet(any());
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -440,7 +440,7 @@ public class UserRatingHandlerTest {
 	public void testErrorResponseIsReturnedOnInvalidContentType() {
 		// given
 		input = createInput("PUT", Collections.singletonMap("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED), "{}");
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -455,7 +455,7 @@ public class UserRatingHandlerTest {
 	public void testErrorResponseIsReturnedOnInvalidMethod() {
 		// given
 		input = createInput("POST", null, "{}");
-		
+
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
@@ -465,7 +465,6 @@ public class UserRatingHandlerTest {
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
 	}
-
 
 	private APIGatewayProxyRequestEvent createInput(String method, Map<String, String> headers, String body) {
 		APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent();

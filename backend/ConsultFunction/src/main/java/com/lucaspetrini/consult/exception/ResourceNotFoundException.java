@@ -12,7 +12,7 @@ public class ResourceNotFoundException extends ServiceException {
 	public ResourceNotFoundException() {
 		super("Resource not found.", 500);
 	}
-	
+
 	/**
 	 * Resource not found exception.
 	 * 

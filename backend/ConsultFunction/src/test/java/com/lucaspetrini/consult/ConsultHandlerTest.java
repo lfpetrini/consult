@@ -10,7 +10,7 @@ public class ConsultHandlerTest {
 		// SQLite for DynamoDBLocal
 		System.setProperty("sqlite4java.library.path", "native-libs");
 	}
-	
+
 	@Test
 	public void successfulResponse() {
 		/*

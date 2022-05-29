@@ -14,7 +14,7 @@ public class DatabaseException extends ServiceException {
 	public DatabaseException(Throwable cause) {
 		super(cause, "Database error.", 500);
 	}
-	
+
 	/**
 	 * Database issue exception.
 	 * 
@@ -23,7 +23,7 @@ public class DatabaseException extends ServiceException {
 	public DatabaseException(String message) {
 		super(message, 500);
 	}
-	
+
 	/**
 	 * Database issue exception.
 	 * 
