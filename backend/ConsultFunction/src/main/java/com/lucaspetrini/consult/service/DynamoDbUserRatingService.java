@@ -195,7 +195,15 @@ public class DynamoDbUserRatingService implements UserRatingService {
 		addToTransaction(transactWriteRequestBuilder, table, item, false);
 	}
 
+	/**
+	 * Return a new {@link UserRating} instance identical to the one passed as parameter.
+	 * 
+	 * @param userRating instance to clone.
+	 * @return cloned user rating.
+	 */
 	protected UserRating cloneUserRating(UserRating userRating) {
+		if(userRating == null)
+			return null;
 		UserRating newUserRating = new UserRating();
 		newUserRating.setSku(userRating.getSku());
 		newUserRating.setUser(userRating.getUser());
@@ -206,6 +214,13 @@ public class DynamoDbUserRatingService implements UserRatingService {
 		return newUserRating;
 	}
 
+	/**
+	 * Get a single item from the database.
+	 * 
+	 * @param code user rating code.
+	 * @param user user rating user id.
+	 * @return item, or null if it doesn't exist.
+	 */
 	protected UserRating getItem(String code, String user) {
 		Key key = Key.builder()
                 .partitionValue(code)

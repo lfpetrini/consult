@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.lucaspetrini.consult.exception.DatabaseException;
+import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.DynamoDBExtension;
 
@@ -103,7 +104,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	private static final String GSI_RATING = "GSIRating";
 	private static final String SKU_VALUE = "1321123";
 	private static final String USER_VALUE_NO_VERSION = "122151";
-	private static final String SECOND_ITEM_SKU_VALUE = "78474577";
+	private static final String SKU2_VALUE = "78474577";
 	private static final String USER2_VALUE_NO_VERSION = "87548714";
 	private static final String USER_VALUE_1 = "v1-122151";
 	private static final Long VERSION_VALUE_1 = 1L;
@@ -166,8 +167,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		ListTablesResponse listTablesResponseAfterCreation = client.listTables();
 		// delete table found
 		listTablesResponseAfterCreation.tableNames().stream()
-			.map(name -> DeleteTableRequest.builder().tableName(name).build())
-			.forEach(client::deleteTable);
+				.map(name -> DeleteTableRequest.builder().tableName(name).build()).forEach(client::deleteTable);
 	}
 
 	@Test
@@ -184,6 +184,23 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		assertEquals(RATING_VALUE_3, rating.getRating());
 		assertEquals(REVIEW_VALUE_3, rating.getReview());
 		assertEquals(VERSION_VALUE_3, rating.getVersion());
+	}
+
+	@Test
+	void testGetItemReturnsSpecificItemFromTable() {
+		// given
+		String code = SKU_VALUE;
+		String userId = USER_VALUE_2;
+
+		// when
+		UserRating rating = service.getItem(code, userId);
+		// then
+		assertEquals(SKU_VALUE, rating.getSku());
+		assertEquals(USER_VALUE_2, rating.getUser());
+		assertEquals(DATE_VALUE_2, rating.getDate());
+		assertEquals(RATING_VALUE_2, rating.getRating());
+		assertEquals(REVIEW_VALUE_2, rating.getReview());
+		assertEquals(VERSION_VALUE_2, rating.getVersion());
 	}
 
 	@Test
@@ -214,38 +231,28 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	@Test
 	void testPutUserRatingCreatesNewItem_WhenUserRatingDoesNotExist() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setUser(USER2_VALUE_NO_VERSION);
-		userRating.setReview(NEW_REVIEW);
-		userRating.setVersion(1000L); // this shouldn't be taken into account
+		UserRating userRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L); // version shouldn't be taken into account
 
 		// when
 		service.put(userRating);
 
 		// then
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v0-" + USER2_VALUE_NO_VERSION,
-				USER_RATING_DATE, NEW_DATE);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v0-" + USER2_VALUE_NO_VERSION,
-				USER_RATING_RATING, NEW_RATING);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v0-" + USER2_VALUE_NO_VERSION,
-				USER_RATING_REVIEW, NEW_REVIEW);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v0-" + USER2_VALUE_NO_VERSION,
-				USER_RATING_VERSION, 1L);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_DATE, NEW_DATE);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_RATING, NEW_RATING);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_REVIEW, NEW_REVIEW);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_VERSION, 1L);
 	}
 
 	@Test
 	void testPutUserRatingReturnsCreatedNewItem_WhenUserRatingDoesNotExist() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setUser(USER2_VALUE_NO_VERSION);
-		userRating.setReview(NEW_REVIEW);
-		userRating.setVersion(1000L); // this shouldn't be taken into account
+		UserRating userRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L); // version shouldn't be taken into account
 
 		// when
 		UserRating item = service.put(userRating);
@@ -266,13 +273,8 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	@Test
 	void testPutUserRatingUpdatesCurrentVersionInTable_WhenUserRatingAlreadyExists() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setUser(USER_VALUE_NO_VERSION);
-		userRating.setReview(NEW_REVIEW);
-		userRating.setVersion(1000L); // this shouldn't be taken into account
+		UserRating userRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L); // version shouldn't be taken into account
 
 		// when
 		service.put(userRating);
@@ -296,78 +298,94 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	@Test
 	void testPutUserRatingCreatesItemForPreviousVersionInTable_WhenUserRatingAlreadyExists() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setReview(NEW_REVIEW);
-		userRating.setUser(USER_VALUE_NO_VERSION);
-		userRating.setVersion(1000L); // this shouldn't be taken into account
+		UserRating userRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L); // version shouldn't be taken into account
 
 		// when
 		service.put(userRating);
 
 		// then
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v3-" + USER_VALUE_NO_VERSION,
-				USER_RATING_DATE, DATE_VALUE_3);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v3-" + USER_VALUE_NO_VERSION,
-				USER_RATING_RATING, RATING_VALUE_3);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v3-" + USER_VALUE_NO_VERSION,
-				USER_RATING_REVIEW, REVIEW_VALUE_3);
-		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER, "v3-" + USER_VALUE_NO_VERSION,
-				USER_RATING_VERSION, VERSION_VALUE_3);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v3-" + USER_VALUE_NO_VERSION, USER_RATING_DATE, DATE_VALUE_3);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v3-" + USER_VALUE_NO_VERSION, USER_RATING_RATING, RATING_VALUE_3);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v3-" + USER_VALUE_NO_VERSION, USER_RATING_REVIEW, REVIEW_VALUE_3);
+		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
+				"v3-" + USER_VALUE_NO_VERSION, USER_RATING_VERSION, VERSION_VALUE_3);
 	}
 
 	@Test
 	void testPutUserRatingCreatesNewItemInRatingsTableWithSameQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingAlreadyExistsAndRatingAlreadyExists() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setUser(USER_VALUE_NO_VERSION);
+		UserRating userRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				null);
 
 		// when
 		service.put(userRating);
 
 		// then
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_QUANTITY, 1L);
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_AGGREGATED, NEW_RATING);
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_VERSION, VERSION_VALUE_3 + 1);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_QUANTITY, 1L);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_AGGREGATED,
+				NEW_RATING);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_VERSION,
+				VERSION_VALUE_3 + 1);
 	}
 
 	@Test
 	void testPutUserRatingCreatesNewItemInRatingsTableWithIncrementedQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingIsNewAndRatingAlreadyExists() {
 		// given
-		UserRating userRating = new UserRating();
-		userRating.setDate(NEW_DATE);
-		userRating.setRating(NEW_RATING);
-		userRating.setSku(SKU_VALUE);
-		userRating.setUser(USER2_VALUE_NO_VERSION);
+		UserRating userRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				null);
 
 		// when
 		service.put(userRating);
 
 		// then
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_QUANTITY, 2L);
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_AGGREGATED, NEW_RATING + RATING_VALUE_3); // aggregated is new_rating (new value passed in put request) + value_3 (value for the existing item)
-		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE,
-				RATING_VERSION, VERSION_VALUE_3 + 1);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_QUANTITY, 2L);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_AGGREGATED,
+				NEW_RATING + RATING_VALUE_3); // aggregated is new_rating (new value passed in put request) + value_3
+												// (value for the existing item)
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_VERSION,
+				VERSION_VALUE_3 + 1);
 	}
 
 	@Test
-	void testPutUserRatingUpdatesRatingsTableWithNewQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingAlreadyExistsButRatingsIsNew() {
-		fail("Not implemented.");
+	void testPutUserRatingUpdatesRatingsTableWithNewQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingAlreadyExistsButRatingIsNew()
+			throws InterruptedException, ExecutionException {
+		// given
+		UserRating userRating = createUserRating(SKU2_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				null);
+
+		// when an existing user rating is updated
+		service.put(userRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU2_VALUE, RATING_DATE, NEW_DATE, RATING_QUANTITY, 1L);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU2_VALUE, RATING_DATE, NEW_DATE, RATING_AGGREGATED,
+				NEW_RATING);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU2_VALUE, RATING_DATE, NEW_DATE, RATING_VERSION, 1);
 	}
 
 	@Test
-	void testPutUserRatingUpdatesRatingsTableWithNewQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingIsNewAndRatingIsNew() {
-		fail("Not implemented.");
+	void testPutUserRatingUpdatesRatingsTableWithNewQuantityAndNewAggregatedAndNewDateAndNewVersion_WhenUserRatingIsNewAndRatingIsNew()
+			throws InterruptedException, ExecutionException {
+		// given
+		// there is no items in the ratings table, for some reason, but there are user
+		// ratings
+		client.deleteTable(DeleteTableRequest.builder().tableName(TABLE_NAME_RATINGS).build());
+		createTableRatings();
+		UserRating userRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				null);
+
+		// when an existing user rating is updated
+		service.put(userRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_QUANTITY, 1L);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_AGGREGATED,
+				NEW_RATING);
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_DATE, NEW_DATE, RATING_VERSION, 1);
 	}
 
 	@Test
@@ -382,6 +400,17 @@ class DynamoDbUserRatingServiceIntegrationTest {
 			// when
 			spyService.put(userRating);
 		});
+	}
+
+	private UserRating createUserRating(String code, String user, Long date, Long rating, String review, Long version) {
+		UserRating userRating = new UserRating();
+		userRating.setDate(date);
+		userRating.setRating(rating);
+		userRating.setSku(code);
+		userRating.setReview(review);
+		userRating.setUser(user);
+		userRating.setVersion(version);
+		return userRating;
 	}
 
 	private void createTableUserRatings() throws InterruptedException, ExecutionException {
@@ -415,8 +444,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 				.localSecondaryIndexes(LocalSecondaryIndex.builder().indexName(LSI_DATE)
 						.keySchema(KeySchemaElement.builder().attributeName(RATING_SKU).keyType("HASH").build(),
 								KeySchemaElement.builder().attributeName(RATING_DATE).keyType("RANGE").build())
-						.projection(Projection.builder().projectionType("ALL").build())
-						.build())
+						.projection(Projection.builder().projectionType("ALL").build()).build())
 				.provisionedThroughput(
 						ProvisionedThroughput.builder().readCapacityUnits(10l).writeCapacityUnits(10l).build())
 				.build());
@@ -429,12 +457,12 @@ class DynamoDbUserRatingServiceIntegrationTest {
 				VERSION_VALUE_1));
 		items.add(createUserRatingPutRequest(SKU_VALUE, USER_VALUE_2, RATING_VALUE_2, DATE_VALUE_2, REVIEW_VALUE_2,
 				VERSION_VALUE_2));
-		items.add(createUserRatingPutRequest(SKU_VALUE, USER_VALUE_CURRENT, RATING_VALUE_3, DATE_VALUE_3, REVIEW_VALUE_3,
-				VERSION_VALUE_3)); // current one - v0
+		items.add(createUserRatingPutRequest(SKU_VALUE, USER_VALUE_CURRENT, RATING_VALUE_3, DATE_VALUE_3,
+				REVIEW_VALUE_3, VERSION_VALUE_3)); // current one - v0
 		requestItems.put(TABLE_NAME_USER_RATINGS, items);
 		BatchWriteItemRequest request = BatchWriteItemRequest.builder().requestItems(requestItems).build();
 		BatchWriteItemResponse result = client.batchWriteItem(request);
-		System.out.println("Table " + TABLE_NAME_USER_RATINGS +  " fully populated: " + result.hasUnprocessedItems());
+		System.out.println("Table " + TABLE_NAME_USER_RATINGS + " fully populated: " + result.hasUnprocessedItems());
 	}
 
 	private void pupulateTableRatings() throws InterruptedException, ExecutionException {
@@ -446,7 +474,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		requestItems.put(TABLE_NAME_RATINGS, items);
 		BatchWriteItemRequest request = BatchWriteItemRequest.builder().requestItems(requestItems).build();
 		BatchWriteItemResponse result = client.batchWriteItem(request);
-		System.out.println("Table " + TABLE_NAME_RATINGS +  " fully populated: " + result.hasUnprocessedItems());
+		System.out.println("Table " + TABLE_NAME_RATINGS + " fully populated: " + result.hasUnprocessedItems());
 	}
 
 	private WriteRequest createUserRatingPutRequest(String skuValue, String userValue, Long ratingValue, Long dateValue,
@@ -463,7 +491,8 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		return userRating;
 	}
 
-	private WriteRequest createRatingPutRequest(String skuValue, Long dateValue, Long quantity, Long aggregated, Long version) {
+	private WriteRequest createRatingPutRequest(String skuValue, Long dateValue, Long quantity, Long aggregated,
+			Long version) {
 		Map<String, AttributeValue> attributeMap = new HashMap<>();
 		attributeMap.put(RATING_SKU, AttributeValue.builder().s(skuValue).build());
 		attributeMap.put(RATING_DATE, AttributeValue.builder().n(String.valueOf(dateValue)).build());
@@ -479,9 +508,10 @@ class DynamoDbUserRatingServiceIntegrationTest {
 			String attributeName, Object attributeValue) {
 		Map<String, AttributeValue> key = new HashMap<>();
 		key.put(hash, AttributeValue.fromS(hashValue));
-		key.put(sort, sortValue instanceof Long ? AttributeValue.fromN(String.valueOf(sortValue)) : AttributeValue.fromS((String)sortValue));
-		GetItemResponse itemResponse = client.getItem(
-				GetItemRequest.builder().tableName(tableName).key(key).attributesToGet(attributeName).build());
+		key.put(sort, sortValue instanceof Long ? AttributeValue.fromN(String.valueOf(sortValue))
+				: AttributeValue.fromS((String) sortValue));
+		GetItemResponse itemResponse = client
+				.getItem(GetItemRequest.builder().tableName(tableName).key(key).attributesToGet(attributeName).build());
 		assertEquals(attributeValue.toString(), getFirst(itemResponse.item().get(attributeName)));
 	}
 
