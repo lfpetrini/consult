@@ -12,23 +12,21 @@ import com.lucaspetrini.consult.exception.RequestDeserialisationException;
 import com.lucaspetrini.consult.exception.ServiceException;
 import com.lucaspetrini.consult.exception.UnsupportedContentTypeException;
 import com.lucaspetrini.consult.exception.UnsupportedMethodException;
-import com.lucaspetrini.consult.handler.ConsultUserRatingRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultRatingRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
-import com.lucaspetrini.consult.request.GetUserRatingRequest;
+import com.lucaspetrini.consult.request.GetRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
-import com.lucaspetrini.consult.request.PutUserRatingRequest;
-import com.lucaspetrini.consult.response.GetUserRatingResponse;
+import com.lucaspetrini.consult.response.GetRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
-import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
  * Handler for requests to Lambda function.
  */
-public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class RatingHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private ObjectMapper objectMapper;
-	private ConsultUserRatingRequestHandler requestHandler;
+	private ConsultRatingRequestHandler requestHandler;
 
 	/**
 	 * Main request handler.
@@ -41,12 +39,10 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 		HttpResponse<?>  response = null;
 		String responseBody = null;
 		try {
+			// TODO: refactor
 			validateHeaders(input.getHeaders());
 			String method = input.getHttpMethod();
 			switch (method) {
-			case ConsultConstants.HTTP_METHOD_PUT:
-				response = handlePut(input, context);
-				break;
 			case ConsultConstants.HTTP_METHOD_GET:
 				response = handleGet(input, context);
 				break;
@@ -103,32 +99,16 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 	}
 
 	// TODO refactor
-	private HttpResponse<PutUserRatingResponse> handlePut(APIGatewayProxyRequestEvent input, Context context) {
-		PutUserRatingRequest requestBody = null;
+	private HttpResponse<GetRatingResponse> handleGet(APIGatewayProxyRequestEvent input, Context context) {
+		GetRatingRequest requestBody = null;
 		try {
-			requestBody = objectMapper.deserialise(input.getBody(), PutUserRatingRequest.class);
+			requestBody = objectMapper.deserialise(input.getBody(), GetRatingRequest.class);
 		} catch (Exception e) {
 			// log e
 			throw new RequestDeserialisationException(e);
 		}
 
-		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
-		request.setBody(requestBody);
-		request.setHeaders(input.getHeaders());
-		return requestHandler.handlePut(request);
-	}
-
-	// TODO refactor
-	private HttpResponse<GetUserRatingResponse> handleGet(APIGatewayProxyRequestEvent input, Context context) {
-		GetUserRatingRequest requestBody = null;
-		try {
-			requestBody = objectMapper.deserialise(input.getBody(), GetUserRatingRequest.class);
-		} catch (Exception e) {
-			// log e
-			throw new RequestDeserialisationException(e);
-		}
-
-		HttpRequest<GetUserRatingRequest> request = new HttpRequest<>();
+		HttpRequest<GetRatingRequest> request = new HttpRequest<>();
 		request.setBody(requestBody);
 		request.setHeaders(input.getHeaders());
 		return requestHandler.handleGet(request);
@@ -138,7 +118,7 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 		this.objectMapper = objectMapper;
 	}
 
-	public void setRequestHandler(ConsultUserRatingRequestHandler requestHandler) {
+	public void setRequestHandler(ConsultRatingRequestHandler requestHandler) {
 		this.requestHandler = requestHandler;
 	}
 }

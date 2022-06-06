@@ -3,7 +3,6 @@ package com.lucaspetrini.consult.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
@@ -22,7 +21,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.lucaspetrini.consult.exception.DatabaseException;
-import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.DynamoDBExtension;
 

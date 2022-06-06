@@ -1,7 +1,5 @@
 package com.lucaspetrini.consult.service;
 
-import java.util.concurrent.ExecutionException;
-
 import com.lucaspetrini.consult.exception.DatabaseException;
 import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.service.model.UserRating;

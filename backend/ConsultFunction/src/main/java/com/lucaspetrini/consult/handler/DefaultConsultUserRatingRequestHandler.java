@@ -17,7 +17,7 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
  * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
  * {@link UserRatingService}.
  */
-public class DefaultConsultRequestHandler implements ConsultRequestHandler {
+public class DefaultConsultUserRatingRequestHandler implements ConsultUserRatingRequestHandler {
 
 	private UserRatingService userRatingService;
 

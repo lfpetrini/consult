@@ -97,7 +97,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: ConsultGetRatingFunction
-      Handler: com.lucaspetrini.consult.RatingsHandler::handleGet
+      Handler: com.lucaspetrini.consult.RatingHandler::handleGet
       Runtime: java11
       Architectures:
         - x86_64
@@ -117,7 +117,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ConsultGetUserRatingFunction
-      Handler: com.lucaspetrini.consult.UserRatingsHandler::handleGet
+      Handler: com.lucaspetrini.consult.UserRatingHandler::handleGet
       Runtime: java11
       Architectures:
         - x86_64
@@ -137,7 +137,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ConsultPutUserRatingFunction
-      Handler: com.lucaspetrini.consult.UserRatingsHandler::handlePut
+      Handler: com.lucaspetrini.consult.UserRatingHandler::handlePut
       Runtime: java11
       Architectures:
         - x86_64

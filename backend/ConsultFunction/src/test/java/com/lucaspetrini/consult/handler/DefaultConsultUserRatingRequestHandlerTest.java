@@ -33,11 +33,11 @@ import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
- * Test {@link DefaultConsultRequestHandler}.
+ * Test {@link DefaultConsultUserRatingRequestHandler}.
  *
  */
 @ExtendWith(MockitoExtension.class)
-public class DefaultConsultRequestHandlerTest {
+public class DefaultConsultUserRatingRequestHandlerTest {
 
 	private static final String USER_ID_VALUE = "123";
 	private static final String CODE_VALUE = "567";
@@ -57,7 +57,7 @@ public class DefaultConsultRequestHandlerTest {
 		USER_RATING.setVersion(VERSION);
 	}
 
-	private DefaultConsultRequestHandler handler;
+	private DefaultConsultUserRatingRequestHandler handler;
 	private @Mock UserRatingService service;
 	private @Captor ArgumentCaptor<String> userIdCaptor;
 	private @Captor ArgumentCaptor<String> codeCaptor;
@@ -71,7 +71,7 @@ public class DefaultConsultRequestHandlerTest {
 
 	@BeforeEach
 	public void setUp() {
-		handler = new DefaultConsultRequestHandler();
+		handler = new DefaultConsultUserRatingRequestHandler();
 		handler.setUserRatingService(service);
 	}
 

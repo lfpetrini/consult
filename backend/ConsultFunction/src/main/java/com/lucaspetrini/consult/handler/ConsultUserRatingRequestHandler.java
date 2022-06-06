@@ -8,12 +8,12 @@ import com.lucaspetrini.consult.response.HttpResponse;
 import com.lucaspetrini.consult.response.PutUserRatingResponse;
 
 /**
- * HTTP request handler.
+ * HTTP request handler for the Consult API operations on user ratings.
  */
-public interface ConsultRequestHandler {
+public interface ConsultUserRatingRequestHandler {
 
 	/**
-	 * Process a PUT request.
+	 * Process a PUT request for user ratings.
 	 * 
 	 * @param request PUT request.
 	 * @return HTTP response.
@@ -21,7 +21,7 @@ public interface ConsultRequestHandler {
 	HttpResponse<PutUserRatingResponse> handlePut(HttpRequest<PutUserRatingRequest> request);
 
 	/**
-	 * Process a GET request.
+	 * Process a GET request for user ratings.
 	 * 
 	 * @param request GET request.
 	 * @return HTTP response.

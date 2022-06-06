@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.lucaspetrini.consult.handler.ConsultRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultUserRatingRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
@@ -36,7 +36,7 @@ import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
- * Test {@link UserRatingHandle}.
+ * Test {@link UserRatingHandler}.
  */
 @ExtendWith(MockitoExtension.class)
 public class UserRatingHandlerTest {
@@ -48,6 +48,7 @@ public class UserRatingHandlerTest {
 	private static final PutUserRatingResponse VALID_PUT_RESPONSE = new PutUserRatingResponse();
 	private static final GetUserRatingResponse VALID_GET_RESPONSE = new GetUserRatingResponse();
 	private static final String ERROR_RESPONSE_UNSUPPORTED_POST = "{\"errorDesc\":\"Unsupported HTTP method POST.\"}";
+	private static final String ERROR_RESPONSE_UNSUPPORTED_DELETE = "{\"errorDesc\":\"Unsupported HTTP method DELETE.\"}";
 	private static final String ERROR_RESPONSE_UNSUPPORTED_APPLICATION_X_WWW_FORM_URLENCODED = "{\"errorDesc\":\"Unsupported Content-Type application/x-www-form-urlencoded.\"}";
 	private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	private static final String CUSTOM_HEADER = "cupcake";
@@ -55,7 +56,7 @@ public class UserRatingHandlerTest {
 
 	private UserRatingHandler handler;
 	private @Mock ObjectMapper objectMapper;
-	private @Mock ConsultRequestHandler requestHandler;
+	private @Mock ConsultUserRatingRequestHandler requestHandler;
 	private @Mock Context context;
 	private @Captor ArgumentCaptor<HttpRequest<PutUserRatingRequest>> putUserRatingRequestCaptor;
 	private @Captor ArgumentCaptor<HttpRequest<GetUserRatingRequest>> getUserRatingRequestCaptor;
@@ -452,7 +453,7 @@ public class UserRatingHandlerTest {
 	}
 
 	@Test
-	public void testErrorResponseIsReturnedOnInvalidMethod() {
+	public void testErrorResponseIsReturnedOnInvalidMethod_POST() {
 		// given
 		input = createInput("POST", null, "{}");
 
@@ -462,6 +463,21 @@ public class UserRatingHandlerTest {
 		// then
 		verifyNoInteractions(requestHandler);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_POST, response.getBody());
+		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
+		assertEquals(400, (int)response.getStatusCode());
+	}
+
+	@Test
+	public void testErrorResponseIsReturnedOnInvalidMethod_DELETE() {
+		// given
+		input = createInput("DELETE", null, "{}");
+
+		// when
+		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
+
+		// then
+		verifyNoInteractions(requestHandler);
+		assertEquals(ERROR_RESPONSE_UNSUPPORTED_DELETE, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
 	}
