@@ -33,11 +33,11 @@ import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
- * Test {@link DefaultConsultUserRatingRequestHandler}.
+ * Test {@link ConsultUserRatingGetRequestHandler}.
  *
  */
 @ExtendWith(MockitoExtension.class)
-public class DefaultConsultUserRatingRequestHandlerTest {
+public class ConsultUserRatingGetRequestHandlerTest {
 
 	private static final String USER_ID_VALUE = "123";
 	private static final String CODE_VALUE = "567";
@@ -57,23 +57,23 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		USER_RATING.setVersion(VERSION);
 	}
 
-	private DefaultConsultUserRatingRequestHandler handler;
+	private ConsultUserRatingGetRequestHandler handler;
 	private @Mock UserRatingService service;
 	private @Captor ArgumentCaptor<String> userIdCaptor;
 	private @Captor ArgumentCaptor<String> codeCaptor;
 	private @Captor ArgumentCaptor<UserRating> userRatingCaptor;
+
+	@BeforeEach
+	public void setUp() {
+		handler = new ConsultUserRatingGetRequestHandler();
+		handler.setUserRatingService(service);
+	}
 
 	/*************************************************************
 	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	 *          ~~~~~~~~~~~ TESTS FOR GET ~~~~~~~~~~~
 	 * /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 	 ************************************************************/
-
-	@BeforeEach
-	public void setUp() {
-		handler = new DefaultConsultUserRatingRequestHandler();
-		handler.setUserRatingService(service);
-	}
 
 	@Test
 	public void testGetBySkuAndUserCallsUserRatingService() {
@@ -86,7 +86,7 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 
 		// when
-		handler.handleGet(request);
+		handler.handle(request);
 
 		// then
 		verify(service).getByUserIdAndCode(userIdCaptor.capture(), codeCaptor.capture());
@@ -120,7 +120,7 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 
 		// when
-		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
+		HttpResponse<GetUserRatingResponse> response = handler.handle(request);
 
 		// then
 		GetUserRatingResponse responseBody = response.getBody();
@@ -139,7 +139,7 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 
 		// when
-		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
+		HttpResponse<GetUserRatingResponse> response = handler.handle(request);
 
 		// then
 		assertEquals(200, response.getStatusCode());
@@ -153,7 +153,7 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		doReturn(USER_RATING).when(service).getByUserIdAndCode(any(), any());
 
 		// when
-		HttpResponse<GetUserRatingResponse> response = handler.handleGet(request);
+		HttpResponse<GetUserRatingResponse> response = handler.handle(request);
 
 		// then
 		assertNull(response.getHeaders());
@@ -169,122 +169,7 @@ public class DefaultConsultUserRatingRequestHandlerTest {
 		// then
 		assertThrows(ResourceNotFoundException.class, () -> { 
 			// when
-			handler.handleGet(request);
+			handler.handle(request);
 		});
-	}
-
-	/*************************************************************
-	 * \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-	 *          ~~~~~~~~~~~ TESTS FOR PUT ~~~~~~~~~~~
-	 * /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-	 ************************************************************/
-
-	@Test
-	public void testPutCallsUserRatingService() {
-		// given
-		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
-		Map<String, String> params = new HashMap<>();
-		PutUserRatingRequest requestBody = new PutUserRatingRequest();
-		requestBody.setDate(DATE);
-		requestBody.setRating(RATING);
-		requestBody.setReview(REVIEW);
-		request.setBody(requestBody);
-		params.put(ConsultConstants.PATH_PARAM_USER_ID, USER_ID_VALUE);
-		params.put(ConsultConstants.PATH_PARAM_CODE, CODE_VALUE);
-		request.setPathParams(params);
-		doReturn(USER_RATING).when(service).put(any());
-
-		// when
-		handler.handlePut(request);
-
-		// then
-		verify(service).put(userRatingCaptor.capture());
-		UserRating rating = userRatingCaptor.getValue();
-		assertEquals(USER_ID_VALUE, rating.getUser());
-		assertEquals(CODE_VALUE, rating.getSku());
-		assertEquals(DATE, rating.getDate());
-		assertEquals(RATING, rating.getRating());
-		assertEquals(REVIEW, rating.getReview());
-	}
-
-	@Test
-	public void testPuttResponseReturnedMatchesEntityReturnedByUserRatingService() {
-		// given
-		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
-		request.setBody(new PutUserRatingRequest());
-		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(service).put(any());
-
-		// when
-		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-
-		// then
-		PutUserRatingResponse responseBody = response.getBody();
-		assertEquals(CODE_VALUE, responseBody.getCode());
-		assertEquals(USER_ID_VALUE, responseBody.getUser());
-		assertEquals(RATING, responseBody.getRating());
-		assertEquals(DATE, responseBody.getDate());
-		assertEquals(REVIEW, responseBody.getReview());
-		assertEquals(VERSION, responseBody.getVersion());
-	}
-
-	@Test
-	public void testPutResponseReturns200WhenEntityIsCreated() {
-		// given
-		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
-		request.setBody(new PutUserRatingRequest());
-		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(service).put(any());
-
-		// when
-		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-
-		// then
-		assertEquals(200, response.getStatusCode());
-	}
-
-	@Test
-	public void testPutResponseReturnsNoCustomHeadersWhenEntityIsCreated() {
-		// given
-		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
-		request.setBody(new PutUserRatingRequest());
-		request.setPathParams(Collections.emptyMap());
-		doReturn(USER_RATING).when(service).put(any());
-
-		// when
-		HttpResponse<PutUserRatingResponse> response = handler.handlePut(request);
-
-		// then
-		assertNull(response.getHeaders());
-	}
-
-	@Disabled("To be implemented later")
-	@Test
-	public void testPutDoesNotCallUserRatingServiceIfRequestIsNotValid() {
-		fail("Not implemented.");
-	}
-
-	@Disabled("To be implemented later  (probably not, since it should be handled by Cognito)")
-	@Test
-	public void testPutDoesNotCallUserRatingServiceIfUserIdIsNotAuthenticated() {
-		fail("Not implemented.");
-	}
-
-	@Disabled("To be implemented later")
-	@Test
-	public void testPutDoesNotCallUserRatingServiceIfUserIdIsNotAuthorised() {
-		fail("Not implemented.");
-	}
-
-	@Disabled("To be implemented later  (probably not, since it should be handled by Cognito)")
-	@Test
-	public void testPutReturns401IfUserIdIsNotAuthenticated() {
-		fail("Not implemented.");
-	}
-
-	@Disabled("To be implemented later")
-	@Test
-	public void testPutReturns403IfUserIdIsNotAuthorised() {
-		fail("Not implemented.");
 	}
 }

@@ -12,7 +12,7 @@ import com.lucaspetrini.consult.exception.RequestDeserialisationException;
 import com.lucaspetrini.consult.exception.ServiceException;
 import com.lucaspetrini.consult.exception.UnsupportedContentTypeException;
 import com.lucaspetrini.consult.exception.UnsupportedMethodException;
-import com.lucaspetrini.consult.handler.ConsultRatingRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
@@ -26,7 +26,7 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
 public class RatingHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private ObjectMapper objectMapper;
-	private ConsultRatingRequestHandler requestHandler;
+	private Map<String, RequestHandlerWrapper<?,?>> handlerMap;
 
 	/**
 	 * Main request handler.
@@ -42,11 +42,10 @@ public class RatingHandler implements RequestHandler<APIGatewayProxyRequestEvent
 			// TODO: refactor
 			validateHeaders(input.getHeaders());
 			String method = input.getHttpMethod();
-			switch (method) {
-			case ConsultConstants.HTTP_METHOD_GET:
-				response = handleGet(input, context);
-				break;
-			default:
+			RequestHandlerWrapper<?, ?> handler = handlerMap.get(method.toLowerCase());
+			if(handler != null)
+				response = handleRequest(input, handler, context);
+			else {
 				UnsupportedMethodException invalidMethodException = new UnsupportedMethodException(method);
 				throw invalidMethodException ; // change to a different ServiceException
 			}
@@ -99,26 +98,30 @@ public class RatingHandler implements RequestHandler<APIGatewayProxyRequestEvent
 	}
 
 	// TODO refactor
-	private HttpResponse<GetRatingResponse> handleGet(APIGatewayProxyRequestEvent input, Context context) {
-		GetRatingRequest requestBody = null;
+	private <I, O> HttpResponse<O> handleRequest(APIGatewayProxyRequestEvent input, RequestHandlerWrapper<I,O> handler, Context context) {
+		I requestBody = null;
 		try {
-			requestBody = objectMapper.deserialise(input.getBody(), GetRatingRequest.class);
+			requestBody = objectMapper.deserialise(input.getBody(), handler.getInputClass());
 		} catch (Exception e) {
 			// log e
 			throw new RequestDeserialisationException(e);
 		}
 
-		HttpRequest<GetRatingRequest> request = new HttpRequest<>();
+		HttpRequest<I> request = new HttpRequest<>();
 		request.setBody(requestBody);
 		request.setHeaders(input.getHeaders());
-		return requestHandler.handleGet(request);
+		
+		return handler.getHandler().handle(request);
 	}
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
-	public void setRequestHandler(ConsultRatingRequestHandler requestHandler) {
-		this.requestHandler = requestHandler;
+	public synchronized <I, O> void addRequestHandlerMap(String method, ConsultRequestHandler<I, O> handlerMap, Class<I> inputClass) {
+		if(this.handlerMap == null) {
+			this.handlerMap = new HashMap<>();
+		}
+		this.handlerMap.put(method, new RequestHandlerWrapper<>(handlerMap, inputClass));
 	}
 }

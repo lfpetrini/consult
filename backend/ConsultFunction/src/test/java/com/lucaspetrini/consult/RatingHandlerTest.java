@@ -25,10 +25,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.lucaspetrini.consult.handler.ConsultRatingRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetRatingRequest;
+import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
+import com.lucaspetrini.consult.request.PutUserRatingRequest;
 import com.lucaspetrini.consult.response.GetRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
 import com.lucaspetrini.consult.utils.ConsultConstants;
@@ -52,7 +54,7 @@ public class RatingHandlerTest {
 
 	private RatingHandler handler;
 	private @Mock ObjectMapper objectMapper;
-	private @Mock ConsultRatingRequestHandler requestHandler;
+	private @Mock ConsultRequestHandler<GetRatingRequest, GetRatingResponse> requestHandlerGet;
 	private @Mock Context context;
 	private @Captor ArgumentCaptor<HttpRequest<GetRatingRequest>> getRatingRequestCaptor;
 	private APIGatewayProxyRequestEvent input;
@@ -61,7 +63,7 @@ public class RatingHandlerTest {
 	public void setUp() {
 		handler = new RatingHandler();
 		handler.setObjectMapper(objectMapper);
-		handler.setRequestHandler(requestHandler);
+		handler.addRequestHandlerMap("get", requestHandlerGet, GetRatingRequest.class);
 		input = new APIGatewayProxyRequestEvent();
 	}
 
@@ -78,7 +80,7 @@ public class RatingHandlerTest {
 	}
 
 	@Test
-	public void testValidDeserialisedGetRequestIsPassedToRequestHandler() {
+	public void testValidDeserialisedGetRequestIsPassedTorequestHandlerGet() {
 		// given
 		input = createInput("GET", null, "{}");
 		GetRatingRequest getRating = new GetRatingRequest();
@@ -88,18 +90,18 @@ public class RatingHandlerTest {
 		handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handleGet(getRatingRequestCaptor.capture());
+		verify(requestHandlerGet, times(1)).handle(getRatingRequestCaptor.capture());
 		assertEquals(getRating, getRatingRequestCaptor.getValue().getBody());
 		assertEquals(input.getHeaders(), getRatingRequestCaptor.getValue().getHeaders());
 	}
 
 	@Test
-	public void testResponseSerialiserIsCalledAfterRequestHandler_ForGet() {
+	public void testResponseSerialiserIsCalledAfterrequestHandlerGet_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		handler.handleRequest(input, context);
@@ -127,7 +129,7 @@ public class RatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 		doReturn(VALID_GET_RESPONSE_BODY).when(objectMapper).serialise(any());
 
 		// when
@@ -144,7 +146,7 @@ public class RatingHandlerTest {
 		HttpResponse<GetRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(null);
 		response.setStatusCode(200);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -162,7 +164,7 @@ public class RatingHandlerTest {
 		HttpResponse<GetRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -185,7 +187,7 @@ public class RatingHandlerTest {
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
 		response.setHeaders(headers);
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -210,7 +212,7 @@ public class RatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(0)).handleGet(any());
+		verify(requestHandlerGet, times(0)).handle(any());
 		assertEquals(ERROR_RESPONSE_DESERIALISER, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -222,24 +224,24 @@ public class RatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 		doThrow(new RuntimeException()).when(objectMapper).serialise(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handleGet(any());
+		verify(requestHandlerGet, times(1)).handle(any());
 		assertEquals(ERROR_RESPONSE_INTERNAL, responseEvent.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, responseEvent.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(500, (int)responseEvent.getStatusCode());
 	}
 
 	@Test
-	public void testErrorResponseIsReturnedOnRequestHandlerException_ForGet() {
+	public void testErrorResponseIsReturnedOnrequestHandlerGetException_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		doThrow(new RuntimeException()).when(requestHandler).handleGet(any());
+		doThrow(new RuntimeException()).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
@@ -259,7 +261,7 @@ public class RatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_POST, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -274,7 +276,7 @@ public class RatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_PUT, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -289,7 +291,7 @@ public class RatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_DELETE, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());

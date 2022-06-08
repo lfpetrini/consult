@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.lucaspetrini.consult.handler.ConsultUserRatingRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultRequestHandler;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
@@ -56,7 +56,8 @@ public class UserRatingHandlerTest {
 
 	private UserRatingHandler handler;
 	private @Mock ObjectMapper objectMapper;
-	private @Mock ConsultUserRatingRequestHandler requestHandler;
+	private @Mock ConsultRequestHandler<PutUserRatingRequest, PutUserRatingResponse> requestHandlerPut;
+	private @Mock ConsultRequestHandler<GetUserRatingRequest, GetUserRatingResponse> requestHandlerGet;
 	private @Mock Context context;
 	private @Captor ArgumentCaptor<HttpRequest<PutUserRatingRequest>> putUserRatingRequestCaptor;
 	private @Captor ArgumentCaptor<HttpRequest<GetUserRatingRequest>> getUserRatingRequestCaptor;
@@ -67,7 +68,8 @@ public class UserRatingHandlerTest {
 		//System.setProperty("sqlite4java.library.path", "native-libs"); // DynamoDb only
 		handler = new UserRatingHandler();
 		handler.setObjectMapper(objectMapper);
-		handler.setRequestHandler(requestHandler);
+		handler.addRequestHandlerMap("get", requestHandlerGet, GetUserRatingRequest.class);
+		handler.addRequestHandlerMap("put", requestHandlerPut, PutUserRatingRequest.class);
 		input = new APIGatewayProxyRequestEvent();
 	}
 
@@ -106,7 +108,7 @@ public class UserRatingHandlerTest {
 		handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handlePut(putUserRatingRequestCaptor.capture());
+		verify(requestHandlerPut, times(1)).handle(putUserRatingRequestCaptor.capture());
 		assertEquals(putUserRating, putUserRatingRequestCaptor.getValue().getBody());
 		assertEquals(input.getHeaders(), putUserRatingRequestCaptor.getValue().getHeaders());
 	}
@@ -122,7 +124,7 @@ public class UserRatingHandlerTest {
 		handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handleGet(getUserRatingRequestCaptor.capture());
+		verify(requestHandlerGet, times(1)).handle(getUserRatingRequestCaptor.capture());
 		assertEquals(getUserRating, getUserRatingRequestCaptor.getValue().getBody());
 		assertEquals(input.getHeaders(), getUserRatingRequestCaptor.getValue().getHeaders());
 	}
@@ -133,7 +135,7 @@ public class UserRatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		handler.handleRequest(input, context);
@@ -148,7 +150,7 @@ public class UserRatingHandlerTest {
 		input = createInput("PUT", null, "{}");
 		HttpResponse<PutUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_PUT_RESPONSE);
-		doReturn(response).when(requestHandler).handlePut(any());
+		doReturn(response).when(requestHandlerPut).handle(any());
 
 		// when
 		handler.handleRequest(input, context);
@@ -176,7 +178,7 @@ public class UserRatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 		doReturn(VALID_GET_RESPONSE_BODY).when(objectMapper).serialise(any());
 
 		// when
@@ -205,7 +207,7 @@ public class UserRatingHandlerTest {
 		input = createInput("PUT", null, "{}");
 		HttpResponse<PutUserRatingResponse> response = new HttpResponse<PutUserRatingResponse>();
 		response.setBody(VALID_PUT_RESPONSE);
-		doReturn(response).when(requestHandler).handlePut(any());
+		doReturn(response).when(requestHandlerPut).handle(any());
 		doReturn(VALID_PUT_RESPONSE_BODY).when(objectMapper).serialise(any());
 
 		// when
@@ -222,7 +224,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<GetUserRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(null);
 		response.setStatusCode(200);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -240,7 +242,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<PutUserRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(null);
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handlePut(any());
+		doReturn(response).when(requestHandlerPut).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -258,7 +260,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<PutUserRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handlePut(any());
+		doReturn(response).when(requestHandlerPut).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -280,7 +282,7 @@ public class UserRatingHandlerTest {
 		headers.put(CUSTOM_HEADER, CUSTOM_HEADER_VALUE);
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);		response.setHeaders(headers);
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handlePut(any());
+		doReturn(response).when(requestHandlerPut).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -299,7 +301,7 @@ public class UserRatingHandlerTest {
 		HttpResponse<GetUserRatingRequest> response = new HttpResponse<>();
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -322,7 +324,7 @@ public class UserRatingHandlerTest {
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
 		response.setHeaders(headers);
 		response.setStatusCode(201);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
@@ -347,7 +349,7 @@ public class UserRatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(0)).handleGet(any());
+		verify(requestHandlerGet, times(0)).handle(any());
 		assertEquals(ERROR_RESPONSE_DESERIALISER, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -363,7 +365,7 @@ public class UserRatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(0)).handleGet(any());
+		verify(requestHandlerPut, times(0)).handle(any());
 		assertEquals(ERROR_RESPONSE_DESERIALISER, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -374,14 +376,14 @@ public class UserRatingHandlerTest {
 		input = createInput("GET", null, "{}");
 		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setBody(VALID_GET_RESPONSE);
-		doReturn(response).when(requestHandler).handleGet(any());
+		doReturn(response).when(requestHandlerGet).handle(any());
 		doThrow(new RuntimeException()).when(objectMapper).serialise(any());
 
 		// when
 		APIGatewayProxyResponseEvent responseEvent = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handleGet(any());
+		verify(requestHandlerGet, times(1)).handle(any());
 		assertEquals(ERROR_RESPONSE_INTERNAL, responseEvent.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, responseEvent.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(500, (int)responseEvent.getStatusCode());
@@ -391,14 +393,14 @@ public class UserRatingHandlerTest {
 	public void testErrorResponseIsReturnedOnMapperSerialiseException_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		doReturn(new HttpResponse<PutUserRatingResponse>()).when(requestHandler).handlePut(any());
+		doReturn(new HttpResponse<PutUserRatingResponse>()).when(requestHandlerPut).handle(any());
 		doThrow(new RuntimeException()).when(objectMapper).serialise(any());
 
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verify(requestHandler, times(1)).handlePut(any());
+		verify(requestHandlerPut, times(1)).handle(any());
 		assertEquals(ERROR_RESPONSE_INTERNAL, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(500, (int)response.getStatusCode());
@@ -408,7 +410,7 @@ public class UserRatingHandlerTest {
 	public void testErrorResponseIsReturnedOnRequestHandlerException_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		doThrow(new RuntimeException()).when(requestHandler).handlePut(any());
+		doThrow(new RuntimeException()).when(requestHandlerPut).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
@@ -423,7 +425,7 @@ public class UserRatingHandlerTest {
 	public void testErrorResponseIsReturnedOnRequestHandlerException_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		doThrow(new RuntimeException()).when(requestHandler).handleGet(any());
+		doThrow(new RuntimeException()).when(requestHandlerGet).handle(any());
 
 		// when
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
@@ -446,7 +448,8 @@ public class UserRatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
+		verifyNoInteractions(requestHandlerPut);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_APPLICATION_X_WWW_FORM_URLENCODED, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -461,7 +464,8 @@ public class UserRatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
+		verifyNoInteractions(requestHandlerPut);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_POST, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
@@ -476,7 +480,8 @@ public class UserRatingHandlerTest {
 		APIGatewayProxyResponseEvent response = handler.handleRequest(input, context);
 
 		// then
-		verifyNoInteractions(requestHandler);
+		verifyNoInteractions(requestHandlerGet);
+		verifyNoInteractions(requestHandlerPut);
 		assertEquals(ERROR_RESPONSE_UNSUPPORTED_DELETE, response.getBody());
 		assertEquals(ConsultConstants.CONTENT_TYPE_JSON, response.getHeaders().get(ConsultConstants.HEADER_CONTENT_TYPE));
 		assertEquals(400, (int)response.getStatusCode());
