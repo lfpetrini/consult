@@ -93,10 +93,16 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: !Ref Stage
+  ConsultLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: ./
+    Metadata:
+      BuildMethod: makefile
   ConsultGetRatingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: ConsultGetRatingFunction
+      CodeUri: rating-function
       Handler: com.lucaspetrini.consult.RatingHandler::handleGet
       Runtime: java11
       Architectures:
@@ -116,7 +122,7 @@ Resources:
   ConsultGetUserRatingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ConsultGetUserRatingFunction
+      CodeUri: user-rating-function
       Handler: com.lucaspetrini.consult.UserRatingHandler::handleGet
       Runtime: java11
       Architectures:
@@ -136,7 +142,7 @@ Resources:
   ConsultPutUserRatingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ConsultPutUserRatingFunction
+      CodeUri: user-rating-function
       Handler: com.lucaspetrini.consult.UserRatingHandler::handlePut
       Runtime: java11
       Architectures:
