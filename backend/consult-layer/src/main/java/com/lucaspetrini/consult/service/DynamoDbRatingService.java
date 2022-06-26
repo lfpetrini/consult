@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.lucaspetrini.consult.exception.DatabaseException;
 import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.service.model.UserRating;
@@ -23,8 +26,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
  * {@link Rating ratings} from Amazon DynamoDB.
  */
 public class DynamoDbRatingService implements RatingService {
-
-	private static final String VERSION_PREFIX = "v0-";
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbRatingService.class);
 	private static final String RATINGS = "ratings";
 	private static final String RATINGS_SKU = "sku";
 	private static final long DEFAULT_TIMEOUT_SECONDS = 100;
@@ -118,7 +120,7 @@ public class DynamoDbRatingService implements RatingService {
 				rating = items.size() > 0 ? items.get(0) : null;
 			}
 		} catch (Exception e) {
-			// TODO log it
+			LOGGER.error("Caught exception: " + e.getMessage());
 			throw e;
 		}
 		return rating;
@@ -141,7 +143,7 @@ public class DynamoDbRatingService implements RatingService {
 		try {
 			return getLatestItem(code);
 		} catch (Exception e) {
-			// TODO log it
+			LOGGER.error("Caught exception: " + e.getMessage());
 			e.printStackTrace();
 			throw new DatabaseException(e);
 		}

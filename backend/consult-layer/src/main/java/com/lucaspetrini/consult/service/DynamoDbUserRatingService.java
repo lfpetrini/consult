@@ -1,5 +1,8 @@
 package com.lucaspetrini.consult.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.lucaspetrini.consult.exception.DatabaseException;
 import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.service.model.UserRating;
@@ -20,6 +23,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
  * from Amazon DynamoDB.
  */
 public class DynamoDbUserRatingService implements UserRatingService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbUserRatingService.class);
 	private static final String VERSION_PREFIX = "v0-";
 	private static final String USER_RATINGS = "user_ratings";
 	private static final String RATINGS = "ratings";
@@ -103,7 +107,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 		try {
 			return getItem(code, VERSION_PREFIX + userId);
 		} catch (Exception e) {
-			// TODO log it
+			LOGGER.error("Caught exception: " + e.getMessage());
 			e.printStackTrace();
 			throw new DatabaseException(e);
 		}
@@ -171,8 +175,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 			}
 			dynamoDbEnhancedClient.transactWriteItems(transactWriteRequestBuilder.build());
 		} catch (Exception e) {
-			// TODO log it
-			e.printStackTrace();
+			LOGGER.error("Caught exception: " + e.getMessage());
 			throw new DatabaseException(e);
 		}
 		newUserRating.setUser(userRating.getUser());

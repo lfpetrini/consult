@@ -4,10 +4,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.lucaspetrini.consult.exception.RequestDeserialisationException;
 import com.lucaspetrini.consult.exception.ServiceException;
 import com.lucaspetrini.consult.exception.UnsupportedContentTypeException;
@@ -23,8 +28,8 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
 /**
  * Handler for requests to Lambda function.
  */
-public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-	
+public class UserRatingHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserRatingHandler.class);
 	private ObjectMapper objectMapper;
 	private Map<HttpMethod, RequestHandlerWrapper<?,?>> handlerMap;
 
@@ -35,12 +40,13 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 	 * @param context Lambda execution environment context.
 	 */
 	@Override
-	public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
+	public APIGatewayV2HTTPResponse handleRequest(final APIGatewayV2HTTPEvent input, final Context context) {
 		HttpResponse<?> response = null;
 		String responseBody = null;
 		try {
 			validateHeaders(input.getHeaders());
-			String method = input.getHttpMethod();
+			String method = input.getRequestContext().getHttp().getMethod();
+			LOGGER.info("Handling method " + method);
 			RequestHandlerWrapper<?, ?> handler = handlerMap.get(HttpMethod.valueOf(method.toUpperCase()));
 			if(handler != null)
 				response = handleRequest(input, handler, context);
@@ -51,11 +57,12 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 			responseBody = objectMapper.serialise(response.getBody());
 		}
 		catch (Exception e) {
+			LOGGER.error("Caught exception: " + e.getMessage());
 			return buildErrorResponse(e);
 		}
 		Map<String, String> responseHeaders = new HashMap<>();
 		responseHeaders.put(ConsultConstants.HEADER_CONTENT_TYPE, ConsultConstants.CONTENT_TYPE_JSON);
-		APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
+		APIGatewayV2HTTPResponse responseEvent = new APIGatewayV2HTTPResponse();
 		if(response != null) {
 			if(response.getHeaders() != null) {
 				responseHeaders.putAll(response.getHeaders());
@@ -82,14 +89,14 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 	}
 
 	// TODO refactor
-	private APIGatewayProxyResponseEvent buildErrorResponse(Exception e) {
+	private APIGatewayV2HTTPResponse buildErrorResponse(Exception e) {
 		String errorMessage = ConsultConstants.UNHANDLED_EXCEPTION_ERROR_DESC;
 		int statusCode = 500;
 		if(e instanceof ServiceException) {
 			errorMessage = ((ServiceException)e).getShortDescription();
 			statusCode = ((ServiceException)e).getStatusCode();
 		}
-		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+		APIGatewayV2HTTPResponse response = new APIGatewayV2HTTPResponse();
 		response.setBody("{\"errorDesc\":\"" + errorMessage + "\"}");
 		response.setStatusCode(statusCode);
 		response.setHeaders(Collections.singletonMap(ConsultConstants.HEADER_CONTENT_TYPE, ConsultConstants.CONTENT_TYPE_JSON));
@@ -97,18 +104,19 @@ public class UserRatingHandler implements RequestHandler<APIGatewayProxyRequestE
 	}
 
 	// TODO refactor
-	private <I, O> HttpResponse<O> handleRequest(APIGatewayProxyRequestEvent input, RequestHandlerWrapper<I,O> handler, Context context) {
+	private <I, O> HttpResponse<O> handleRequest(APIGatewayV2HTTPEvent input, RequestHandlerWrapper<I,O> handler, Context context) {
 		I requestBody = null;
 		try {
 			requestBody = objectMapper.deserialise(input.getBody(), handler.getInputClass());
 		} catch (Exception e) {
-			// log e
+			LOGGER.error("Caught exception: " + e.getMessage());
 			throw new RequestDeserialisationException(e);
 		}
 
 		HttpRequest<I> request = new HttpRequest<>();
 		request.setBody(requestBody);
 		request.setHeaders(input.getHeaders());
+		request.setPathParams(input.getPathParameters());
 		
 		return handler.getHandler().handle(request);
 	}

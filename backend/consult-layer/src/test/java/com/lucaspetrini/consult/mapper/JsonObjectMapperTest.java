@@ -28,20 +28,25 @@ public class JsonObjectMapperTest {
 
 	@Test
 	public void testPutRequestIsSerialised() {
+		// given
 		PutUserRatingRequest request = new PutUserRatingRequest();
 		request.setRating(RATING);
 		request.setDate(DATE);
 		request.setReview(REVIEW);
 
+		// when
 		String serialisedRequest = mapper.serialise(request);
 
+		// then
 		assertEquals(SERIALISED_PUT_REQUEST, serialisedRequest);
 	}
 
 	@Test
 	public void testGetResponseIsDeserialised() {
+		// when
 		GetUserRatingResponse response = mapper.deserialise(DESERIALISED_GET_RESPONSE, GetUserRatingResponse.class);
 
+		// then
 		assertEquals(CODE, response.getCode());
 		assertEquals(USER, response.getUser());
 		assertEquals(RATING, response.getRating());

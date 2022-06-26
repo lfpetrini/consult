@@ -10,7 +10,7 @@ public class ResourceNotFoundException extends ServiceException {
 	 * Resource not found exception.
 	 */
 	public ResourceNotFoundException() {
-		super("Resource not found.", 500);
+		super("Resource not found.", 404);
 	}
 
 	/**
@@ -19,7 +19,7 @@ public class ResourceNotFoundException extends ServiceException {
 	 * @param short description of the issue.
 	 */
 	public ResourceNotFoundException(String message) {
-		super(message, 500);
+		super(message, 404);
 	}
 
 }

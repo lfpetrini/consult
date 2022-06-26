@@ -1,0 +1,52 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /ratings/{code}",
+  "rawPath": "/dev/ratings/1337",
+  "rawQueryString": "",
+  "headers": {
+      "accept": "*/*",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "0",
+      "host": "foobar.execute-api.us-east-1.amazonaws.com",
+      "postman-token": "63764561-5b6c-4420-9e82-1e07ae12239e",
+      "user-agent": "PostmanRuntime/7.28.2",
+      "x-amzn-trace-id": "Root=1-62abd668-209931a70c5cfc640075ddfe",
+      "x-forwarded-for": "188.214.13.153",
+      "x-forwarded-port": "443",
+      "x-forwarded-proto": "https"
+  },
+  "authorizer": {
+    "jwt": {
+      "claims": {
+        "claim1": "value1",
+        "claim2": "value2"
+      },
+      "scopes": [
+        "scope1",
+        "scope2"
+      ]
+    }
+  },
+  "requestContext": {
+      "accountId": "999999",
+      "apiId": "foobar",
+      "domainName": "foobar.execute-api.us-east-1.amazonaws.com",
+      "domainPrefix": "foobar",
+      "http": {
+          "method": "GET",
+          "path": "/dev/ratings/1337",
+          "protocol": "HTTP/1.1",
+          "sourceIp": "188.214.13.153",
+          "userAgent": "PostmanRuntime/7.28.2"
+      },
+      "requestId": "T15wSgpooAMEP8g=",
+      "routeKey": "GET /ratings/{code}",
+      "stage": "dev",
+      "time": "17/Jun/2022:01:18:32 +0000",
+      "timeEpoch": 1655428712039
+  },
+  "pathParameters": {
+      "code": "1337"
+  },
+  "isBase64Encoded": false
+}

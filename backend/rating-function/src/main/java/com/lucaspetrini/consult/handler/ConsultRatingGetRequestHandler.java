@@ -7,6 +7,7 @@ import com.lucaspetrini.consult.request.GetRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
 import com.lucaspetrini.consult.response.GetRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
+import com.lucaspetrini.consult.service.DynamoDbRatingService;
 import com.lucaspetrini.consult.service.RatingService;
 import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
@@ -18,6 +19,24 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
 public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<GetRatingRequest, GetRatingResponse> {
 
 	private RatingService ratingService;
+	
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
+	 * {@link RatingService}.
+	 * 
+	 * @param ratingService rating service.
+	 */
+	public ConsultRatingGetRequestHandler() {}
+
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
+	 * {@link RatingService}.
+	 * 
+	 * @param ratingService rating service.
+	 */
+	public ConsultRatingGetRequestHandler(DynamoDbRatingService ratingService) {
+		setRatingService(ratingService);
+	}
 
 	private GetRatingResponse covertToGetResponseBody(Rating entity) {
 		GetRatingResponse body = new GetRatingResponse();

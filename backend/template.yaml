@@ -9,6 +9,8 @@ Description: >
 Globals:
   Function:
     Timeout: 20
+    Layers:
+      - !Ref ConsultLayer
 Parameters:
   Stage:
     Type: String
@@ -39,7 +41,7 @@ Resources:
           KeyType: HASH
         - AttributeName: version
           KeyType: RANGE
-      LocalSecondaryIndex:
+      LocalSecondaryIndexes:
         - IndexName: LSIDate
           KeySchema:
             - AttributeName: sku
@@ -72,7 +74,7 @@ Resources:
           KeyType: HASH
         - AttributeName: user
           KeyType: RANGE
-      GlobalSecondaryIndex:
+      GlobalSecondaryIndexes:
         - IndexName: GSIRating
           KeySchema:
             - AttributeName: user
@@ -96,18 +98,21 @@ Resources:
   ConsultLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      ContentUri: ./
+      ContentUri: consult-layer
+      CompatibleRuntimes:
+        - java11
     Metadata:
-      BuildMethod: makefile
+      BuildMethod: java11
   ConsultGetRatingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: rating-function
-      Handler: com.lucaspetrini.consult.RatingHandler::handleGet
+      Handler: com.lucaspetrini.consult.RatingHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
       MemorySize: 512
+      Policies: AmazonDynamoDBFullAccess
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           DYNAMO_REGION: eu-west-1
@@ -118,16 +123,17 @@ Resources:
           Properties:
             Path: /ratings/{code}
             Method: get
-            ApiId: ConsultApi
+            ApiId: !Ref ConsultApi
   ConsultGetUserRatingFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: user-rating-function
-      Handler: com.lucaspetrini.consult.UserRatingHandler::handleGet
+      Handler: com.lucaspetrini.consult.UserRatingHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
       MemorySize: 512
+      Policies: AmazonDynamoDBFullAccess
       Environment:
         Variables:
           DYNAMO_REGION: eu-west-1
@@ -138,16 +144,18 @@ Resources:
           Properties:
             Path: /users/{id}/ratings/{code}
             Method: get
-            ApiId: ConsultApi
+            ApiId: !Ref ConsultApi
+  # We could use the same function for PUT and GET
   ConsultPutUserRatingFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: user-rating-function
-      Handler: com.lucaspetrini.consult.UserRatingHandler::handlePut
+      Handler: com.lucaspetrini.consult.UserRatingHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
       MemorySize: 512
+      Policies: AmazonDynamoDBFullAccess
       Environment:
         Variables:
           DYNAMO_REGION: eu-west-1
@@ -158,7 +166,7 @@ Resources:
           Properties:
             Path: /users/{id}/ratings/{code}
             Method: put
-            ApiId: ConsultApi
+            ApiId: !Ref ConsultApi
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
