@@ -105,7 +105,14 @@ public class DynamoDbUserRatingService implements UserRatingService {
 	@Override
 	public UserRating getByUserIdAndCode(String userId, String code) {
 		try {
-			return getItem(code, VERSION_PREFIX + userId);
+			UserRating item = getItem(code, VERSION_PREFIX + userId);
+			if(item != null) {
+				int versionSeparatorPosition = item.getUser().lastIndexOf('-');
+				if(versionSeparatorPosition >= 0) {
+					item.setUser(item.getUser().substring(versionSeparatorPosition + 1));
+				}
+			}
+			return item;
 		} catch (Exception e) {
 			LOGGER.error("Caught exception: " + e.getMessage());
 			e.printStackTrace();
@@ -136,18 +143,12 @@ public class DynamoDbUserRatingService implements UserRatingService {
 				Long version = currentUserRating.getVersion();
 				user = user.substring(user.indexOf('-'));
 				// set version prefix
-				newUserRating = new UserRating();
-				newUserRating.setUser("v" + version + user);
-				newUserRating.setDate(currentUserRating.getDate());
-				newUserRating.setVersion(currentUserRating.getVersion());
-				newUserRating.setSku(currentUserRating.getSku());
-				newUserRating.setReview(currentUserRating.getReview());
-				newUserRating.setRating(currentUserRating.getRating());
-				addToTransaction(transactWriteRequestBuilder, userRatingsTable, newUserRating);
-				UserRating updatedUserRating = cloneUserRating(userRating);
-				updatedUserRating.setUser(VERSION_PREFIX + userRating.getUser());
-				updatedUserRating.setVersion(currentUserRating.getVersion() + 1);
-				addToTransaction(transactWriteRequestBuilder, userRatingsTable, updatedUserRating, true);
+				currentUserRating.setUser("v" + version + user);
+				addToTransaction(transactWriteRequestBuilder, userRatingsTable, currentUserRating);
+				newUserRating = cloneUserRating(userRating);
+				newUserRating.setUser(VERSION_PREFIX + userRating.getUser());
+				newUserRating.setVersion(currentUserRating.getVersion() + 1);
+				addToTransaction(transactWriteRequestBuilder, userRatingsTable, newUserRating, true);
 			}
 
 			rating = new Rating();

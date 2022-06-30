@@ -5,19 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.lucaspetrini.consult.request.PutUserRatingRequest;
-import com.lucaspetrini.consult.response.GetUserRatingResponse;
-
 /**
  * Test {@link JsonObjectMapper}.
  */
 public class JsonObjectMapperTest {
-	private static final String CODE = "SKU123";
-	private static final String USER = "mrpickles";
 	private static final Long RATING = 3L;
 	private static final String REVIEW = "Good";
 	private static final String SERIALISED_PUT_REQUEST = "{'rating':3,'date':9941,'review':'Good'}".replace("'", "\"");
-	private static final String DESERIALISED_GET_RESPONSE = "{'code':'SKU123','user':'mrpickles','rating':3,'date':9941,'review':'Good'}".replace("'", "\"");
 	private static final Long DATE = 9941L;
 	private JsonObjectMapper mapper;
 
@@ -27,9 +21,9 @@ public class JsonObjectMapperTest {
 	}
 
 	@Test
-	public void testPutRequestIsSerialised() {
+	public void testObjectIsSerialised() {
 		// given
-		PutUserRatingRequest request = new PutUserRatingRequest();
+		Request request = new Request();
 		request.setRating(RATING);
 		request.setDate(DATE);
 		request.setReview(REVIEW);
@@ -40,18 +34,23 @@ public class JsonObjectMapperTest {
 		// then
 		assertEquals(SERIALISED_PUT_REQUEST, serialisedRequest);
 	}
+	
+	private static class Request {
+		private Long rating;
+		private Long date;
+		private String review;
 
-	@Test
-	public void testGetResponseIsDeserialised() {
-		// when
-		GetUserRatingResponse response = mapper.deserialise(DESERIALISED_GET_RESPONSE, GetUserRatingResponse.class);
+		public void setRating(Long rating) {
+			this.rating = rating;
+		}
 
-		// then
-		assertEquals(CODE, response.getCode());
-		assertEquals(USER, response.getUser());
-		assertEquals(RATING, response.getRating());
-		assertEquals(DATE, response.getDate());
-		assertEquals(REVIEW, response.getReview());
+		public void setDate(Long date) {
+			this.date = date;
+		}
+
+		public void setReview(String review) {
+			this.review = review;
+		}
 	}
 
 }

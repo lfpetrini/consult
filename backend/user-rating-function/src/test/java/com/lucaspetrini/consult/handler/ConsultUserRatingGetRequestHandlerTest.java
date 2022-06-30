@@ -129,6 +129,7 @@ public class ConsultUserRatingGetRequestHandlerTest {
 		assertEquals(RATING, responseBody.getRating());
 		assertEquals(DATE, responseBody.getDate());
 		assertEquals(REVIEW, responseBody.getReview());
+		assertEquals(VERSION, responseBody.getVersion());
 	}
 
 	@Test

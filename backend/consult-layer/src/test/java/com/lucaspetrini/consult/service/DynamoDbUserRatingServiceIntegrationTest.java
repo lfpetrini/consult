@@ -177,7 +177,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 
 		// then
 		assertEquals(SKU_VALUE, rating.getSku());
-		assertEquals(USER_VALUE_CURRENT, rating.getUser());
+		assertEquals(USER_VALUE_NO_VERSION, rating.getUser());
 		assertEquals(DATE_VALUE_3, rating.getDate());
 		assertEquals(RATING_VALUE_3, rating.getRating());
 		assertEquals(REVIEW_VALUE_3, rating.getReview());
@@ -262,6 +262,24 @@ class DynamoDbUserRatingServiceIntegrationTest {
 		assertEquals(NEW_RATING, item.getRating());
 		assertEquals(NEW_REVIEW, item.getReview());
 		assertEquals(1L, item.getVersion());
+	}
+
+	@Test
+	void testPutUserRatingReturnsCreatedNewItem_WhenUserRatingAlreadyExists() {
+		// given
+		UserRating userRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L); // version shouldn't be taken into account
+
+		// when
+		UserRating item = service.put(userRating);
+
+		// then
+		assertEquals(SKU_VALUE, item.getSku());
+		assertEquals(USER_VALUE_NO_VERSION, item.getUser());
+		assertEquals(NEW_DATE, item.getDate());
+		assertEquals(NEW_RATING, item.getRating());
+		assertEquals(NEW_REVIEW, item.getReview());
+		assertEquals(4L, item.getVersion());
 	}
 
 	/*
@@ -416,9 +434,14 @@ class DynamoDbUserRatingServiceIntegrationTest {
 				.attributeDefinitions(
 						AttributeDefinition.builder().attributeName(USER_RATING_SKU).attributeType("S").build(),
 						AttributeDefinition.builder().attributeName(USER_RATING_USER).attributeType("S").build(),
-						AttributeDefinition.builder().attributeName(USER_RATING_RATING).attributeType("N").build())
+						AttributeDefinition.builder().attributeName(USER_RATING_RATING).attributeType("N").build(),
+						AttributeDefinition.builder().attributeName(USER_RATING_DATE).attributeType("N").build())
 				.keySchema(KeySchemaElement.builder().attributeName(USER_RATING_SKU).keyType("HASH").build(),
 						KeySchemaElement.builder().attributeName(USER_RATING_USER).keyType("RANGE").build())
+				.localSecondaryIndexes(LocalSecondaryIndex.builder().indexName(LSI_DATE)
+						.keySchema(KeySchemaElement.builder().attributeName(RATING_SKU).keyType("HASH").build(),
+								KeySchemaElement.builder().attributeName(RATING_DATE).keyType("RANGE").build())
+						.projection(Projection.builder().projectionType("ALL").build()).build())
 				.globalSecondaryIndexes(GlobalSecondaryIndex.builder().indexName(GSI_RATING)
 						.keySchema(KeySchemaElement.builder().attributeName(USER_RATING_USER).keyType("HASH").build(),
 								KeySchemaElement.builder().attributeName(USER_RATING_RATING).keyType("RANGE").build())

@@ -1,5 +1,7 @@
 package com.lucaspetrini.consult.handler;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 import com.lucaspetrini.consult.request.HttpRequest;
@@ -11,19 +13,35 @@ import com.lucaspetrini.consult.service.model.UserRating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
- * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
- * {@link UserRatingService}.
+ * Default implementation of {@link ConsultRequestHandler} that delegates
+ * requests to an underlying {@link UserRatingService}.
  */
-public class ConsultUserRatingPutRequestHandler implements ConsultRequestHandler<PutUserRatingRequest, PutUserRatingResponse> {
+public class ConsultUserRatingPutRequestHandler
+		implements ConsultRequestHandler<PutUserRatingRequest, PutUserRatingResponse> {
 
 	private UserRatingService userRatingService;
+
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates
+	 * requests to an underlying {@link UserRatingService}.
+	 */
+	public ConsultUserRatingPutRequestHandler() {
+	}
+
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates
+	 * requests to an underlying {@link UserRatingService}.
+	 */
+	public ConsultUserRatingPutRequestHandler(UserRatingService ratingService) {
+		setUserRatingService(ratingService);
+	}
 
 	private UserRating buildUserRating(HttpRequest<PutUserRatingRequest> request) {
 		Map<String, String> pathParams = request.getPathParams();
 		UserRating rating = new UserRating();
 		rating.setUser(pathParams.get(ConsultConstants.PATH_PARAM_USER_ID));
 		rating.setSku(pathParams.get(ConsultConstants.PATH_PARAM_CODE));
-		rating.setDate(request.getBody().getDate());
+		rating.setDate(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
 		rating.setRating(request.getBody().getRating());
 		rating.setReview(request.getBody().getReview());
 		return rating;

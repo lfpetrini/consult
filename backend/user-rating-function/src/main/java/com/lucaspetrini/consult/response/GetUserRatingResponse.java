@@ -9,6 +9,7 @@ public class GetUserRatingResponse {
 	private String user;
 	private Long rating;
 	private Long date;
+	private Long version;
 	private String review;
 
 	public void setCode(String code) {
@@ -49,5 +50,13 @@ public class GetUserRatingResponse {
 
 	public String getReview() {
 		return review;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
+	public Long getVersion() {
+		return version;
 	}
 }

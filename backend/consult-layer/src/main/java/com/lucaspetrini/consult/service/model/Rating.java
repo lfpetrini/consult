@@ -1,5 +1,6 @@
 package com.lucaspetrini.consult.service.model;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
@@ -23,6 +24,7 @@ public class Rating {
 	private Long date;
 	private Long aggregated;
 	private Long quantity;
+	private Boolean hasReviews;
 	private Long version;
 
 	public void setSku(String sku) {
@@ -67,5 +69,14 @@ public class Rating {
 
 	public Long getQuantity() {
 		return quantity;
+	}
+
+	@DynamoDbAttribute(value = "hasReviews")
+	public void setHasReviews(boolean hasReviews) {
+		this.hasReviews = hasReviews;
+	}
+
+	public boolean hasReviews() {
+		return hasReviews;
 	}
 }

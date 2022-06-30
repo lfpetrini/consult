@@ -109,6 +109,7 @@ public class ConsultRatingGetRequestHandlerTest {
 		assertEquals(QUANTITY, responseBody.getQuantity());
 		assertEquals(AGGREGATED, responseBody.getAggregated());
 		assertEquals(DATE, responseBody.getDate());
+		assertEquals(VERSION, responseBody.getVersion());
 	}
 
 	@Test

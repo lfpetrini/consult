@@ -63,8 +63,8 @@ Resources:
           AttributeType: S
         - AttributeName: rating
           AttributeType: N
-        #- AttributeName: date
-        #  AttributeType: N
+        - AttributeName: date
+          AttributeType: N
         #- AttributeName: review
         #  AttributeType: S
         #- AttributeName: version
@@ -74,6 +74,15 @@ Resources:
           KeyType: HASH
         - AttributeName: user
           KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: LSIDate
+          KeySchema:
+            - AttributeName: sku
+              KeyType: HASH
+            - AttributeName: date
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
       GlobalSecondaryIndexes:
         - IndexName: GSIRating
           KeySchema:

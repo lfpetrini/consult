@@ -19,6 +19,20 @@ public class ConsultUserRatingGetRequestHandler implements ConsultRequestHandler
 
 	private UserRatingService userRatingService;
 
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
+	 * {@link UserRatingService}.
+	 */
+	public ConsultUserRatingGetRequestHandler() {}
+
+	/**
+	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
+	 * {@link UserRatingService}.
+	 */
+	public ConsultUserRatingGetRequestHandler(UserRatingService ratingService) {
+		setUserRatingService(ratingService);
+	}
+
 	private GetUserRatingResponse covertToGetResponseBody(UserRating entity) {
 		GetUserRatingResponse body = new GetUserRatingResponse();
 		body.setCode(entity.getSku());

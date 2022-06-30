@@ -7,7 +7,6 @@ import com.lucaspetrini.consult.request.GetRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
 import com.lucaspetrini.consult.response.GetRatingResponse;
 import com.lucaspetrini.consult.response.HttpResponse;
-import com.lucaspetrini.consult.service.DynamoDbRatingService;
 import com.lucaspetrini.consult.service.RatingService;
 import com.lucaspetrini.consult.service.model.Rating;
 import com.lucaspetrini.consult.utils.ConsultConstants;
@@ -34,7 +33,7 @@ public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<Get
 	 * 
 	 * @param ratingService rating service.
 	 */
-	public ConsultRatingGetRequestHandler(DynamoDbRatingService ratingService) {
+	public ConsultRatingGetRequestHandler(RatingService ratingService) {
 		setRatingService(ratingService);
 	}
 

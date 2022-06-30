@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.lucaspetrini.consult.exception.RequestDeserialisationException;
@@ -18,11 +16,15 @@ import com.lucaspetrini.consult.exception.ServiceException;
 import com.lucaspetrini.consult.exception.UnsupportedContentTypeException;
 import com.lucaspetrini.consult.exception.UnsupportedMethodException;
 import com.lucaspetrini.consult.handler.ConsultRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultUserRatingGetRequestHandler;
+import com.lucaspetrini.consult.handler.ConsultUserRatingPutRequestHandler;
+import com.lucaspetrini.consult.mapper.JsonObjectMapper;
 import com.lucaspetrini.consult.mapper.ObjectMapper;
 import com.lucaspetrini.consult.request.GetUserRatingRequest;
 import com.lucaspetrini.consult.request.HttpRequest;
-import com.lucaspetrini.consult.response.GetUserRatingResponse;
+import com.lucaspetrini.consult.request.PutUserRatingRequest;
 import com.lucaspetrini.consult.response.HttpResponse;
+import com.lucaspetrini.consult.service.DynamoDbUserRatingService;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
@@ -32,6 +34,13 @@ public class UserRatingHandler implements RequestHandler<APIGatewayV2HTTPEvent, 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRatingHandler.class);
 	private ObjectMapper objectMapper;
 	private Map<HttpMethod, RequestHandlerWrapper<?,?>> handlerMap;
+	
+	public UserRatingHandler() {
+		this.objectMapper = new JsonObjectMapper();
+		DynamoDbUserRatingService userRatingService = new DynamoDbUserRatingService();
+		addRequestHandlerMap(HttpMethod.GET, new ConsultUserRatingGetRequestHandler(userRatingService), GetUserRatingRequest.class);
+		addRequestHandlerMap(HttpMethod.PUT, new ConsultUserRatingPutRequestHandler(userRatingService), PutUserRatingRequest.class);
+	}
 
 	/**
 	 * Main request handler.

@@ -2,11 +2,16 @@ package com.lucaspetrini.consult.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,7 +82,6 @@ public class ConsultUserRatingPutRequestHandlerTest {
 		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
 		Map<String, String> params = new HashMap<>();
 		PutUserRatingRequest requestBody = new PutUserRatingRequest();
-		requestBody.setDate(DATE);
 		requestBody.setRating(RATING);
 		requestBody.setReview(REVIEW);
 		request.setBody(requestBody);
@@ -94,13 +98,14 @@ public class ConsultUserRatingPutRequestHandlerTest {
 		UserRating rating = userRatingCaptor.getValue();
 		assertEquals(USER_ID_VALUE, rating.getUser());
 		assertEquals(CODE_VALUE, rating.getSku());
-		assertEquals(DATE, rating.getDate());
+		assertTrue(Instant.ofEpochMilli(rating.getDate()).minus(1, ChronoUnit.SECONDS).isBefore(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+		assertTrue(Instant.ofEpochMilli(rating.getDate()).plus(1, ChronoUnit.SECONDS).isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
 		assertEquals(RATING, rating.getRating());
 		assertEquals(REVIEW, rating.getReview());
 	}
 
 	@Test
-	public void testPuttResponseReturnedMatchesEntityReturnedByUserRatingService() {
+	public void testPutResponseReturnedMatchesEntityReturnedByUserRatingService() {
 		// given
 		HttpRequest<PutUserRatingRequest> request = new HttpRequest<>();
 		request.setBody(new PutUserRatingRequest());
