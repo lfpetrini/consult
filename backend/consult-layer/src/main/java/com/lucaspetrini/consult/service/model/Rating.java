@@ -24,7 +24,7 @@ public class Rating {
 	private Long date;
 	private Long aggregated;
 	private Long quantity;
-	private Boolean hasReviews;
+	private Long numberOfReviews;
 	private Long version;
 
 	public void setSku(String sku) {
@@ -71,12 +71,11 @@ public class Rating {
 		return quantity;
 	}
 
-	@DynamoDbAttribute(value = "hasReviews")
-	public void setHasReviews(boolean hasReviews) {
-		this.hasReviews = hasReviews;
+	public void setNumberOfReviews(Long numberOfReviews) {
+		this.numberOfReviews = numberOfReviews;
 	}
 
-	public boolean hasReviews() {
-		return hasReviews;
+	public Long getNumberOfReviews() {
+		return numberOfReviews;
 	}
 }

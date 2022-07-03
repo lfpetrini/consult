@@ -21,6 +21,18 @@ Parameters:
       - qa
       - uat
       - prod
+  CognitoDomainName:
+    Type: String
+    Default: consult-dev
+    Description: Cognito domain name.
+  CognitoCallbakURL:
+    Type: String
+    Default: http://localhost:4200
+    Description: Cognito OAuth2 callback URL.
+  CognitoLogoutURL:
+    Type: String
+    Default: http://localhost:4200/logout
+    Description: Cognito OAuth2 logout URL.
 Resources:
   RatingsTable:
     Type: AWS::DynamoDB::Table
@@ -100,10 +112,96 @@ Resources:
               #- review
       BillingMode: PAY_PER_REQUEST
       TableName: "user_ratings"
+  ConsultUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1 # Documentation says it's not mandatory, but deployment fails when not explicitly set
+      AdminCreateUserConfig: 
+          AllowAdminCreateUserOnly: false
+      MfaConfiguration: "OFF"
+      Policies: 
+        PasswordPolicy: 
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+          TemporaryPasswordValidityDays: 14
+      Schema: 
+        - AttributeDataType: String
+          DeveloperOnlyAttribute: False
+          Mutable: False
+          Name: name
+          Required: True
+        - AttributeDataType: String
+          DeveloperOnlyAttribute: False
+          Mutable: False
+          Name: family_name
+          Required: True
+      UsernameAttributes:
+        - email
+      UsernameConfiguration: 
+        CaseSensitive: false
+  ConsultUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref ConsultUserPool 
+      Domain: !Ref CognitoDomainName
+  ConsultUserPoolResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties: 
+      Identifier: consult
+      Name: Consult API
+      Scopes: 
+        - ScopeName: write_rating
+          ScopeDescription: Write user rating.
+      UserPoolId: !Ref ConsultUserPool
+  ConsultUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      #AccessTokenValidity: Integer
+      AllowedOAuthFlows: 
+        - code
+      AllowedOAuthScopes: 
+        - openid
+        - consult/write_rating
+      CallbackURLs: 
+        - !Ref CognitoCallbakURL
+      #ClientName: String
+      EnableTokenRevocation: true
+      IdTokenValidity: 1
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: hours
+      LogoutURLs: 
+        - !Ref CognitoLogoutURL
+      PreventUserExistenceErrors: ENABLED
+      RefreshTokenValidity: 72
+      UserPoolId: !Ref ConsultUserPool
+      SupportedIdentityProviders:
+        - COGNITO
   ConsultApi:
     Type: AWS::Serverless::HttpApi
     Properties:
+      FailOnWarnings: true
       StageName: !Ref Stage
+      # This doesn't seem to work well at the moment
+      # https://github.com/aws/aws-sam-cli/issues/2359 and https://github.com/aws/aws-sam-cli/issues/2410
+      Auth:
+        Authorizers:
+          ConsultAuthorizer:
+            IdentitySource: "$request.header.Authorization"
+            AuthorizationScopes:
+              - consult/write_rating
+            JwtConfiguration:
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/{ConsultUserPool}"
+                #- UserPoolId: !Ref ConsultUserPool
+              audience:
+                - !Ref ConsultUserPoolClient
   ConsultLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -176,6 +274,10 @@ Resources:
             Path: /users/{id}/ratings/{code}
             Method: put
             ApiId: !Ref ConsultApi
+            Auth:
+              Authorizer: ConsultAuthorizer
+              AuthorizationScopes:
+                - consult/write_rating
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -187,6 +289,9 @@ Outputs:
   ConsultUserRatingApi:
     Description: "API Gateway endpoint URL for ConsultUserRating function"
     Value: !Sub "https://${ConsultApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/users/{id}/ratings/{code}"
+  ConsultSSOLoginURL:
+    Description: "Amazon Cognito endpoint for OAuth2 SSO with PKCE"
+    Value: !Sub "https://${CognitoDomainName}.auth.${AWS::Region}.amazoncognito.com/authorize?response_type=code&client_id=${ConsultUserPoolClient}&code_challenge={codeChallenge}&code_challenge_method=S256&redirect_uri=${CognitoCallbakURL}&scope=consult/write_rating&audience=consult&state={state}"
   ConsultGetRatingFunction:
     Description: "Get Rating Function ARN"
     Value: !GetAtt ConsultGetRatingFunction.Arn

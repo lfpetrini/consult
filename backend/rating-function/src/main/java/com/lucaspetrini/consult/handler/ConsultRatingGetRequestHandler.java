@@ -43,6 +43,7 @@ public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<Get
 		body.setDate(entity.getDate());
 		body.setQuantity(entity.getQuantity());
 		body.setAggregated(entity.getAggregated());
+		body.setVersion(entity.getVersion());
 		return body;
 	}
 

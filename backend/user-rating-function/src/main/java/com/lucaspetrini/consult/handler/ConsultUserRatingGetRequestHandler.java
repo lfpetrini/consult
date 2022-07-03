@@ -40,6 +40,7 @@ public class ConsultUserRatingGetRequestHandler implements ConsultRequestHandler
 		body.setRating(entity.getRating());
 		body.setDate(entity.getDate());
 		body.setReview(entity.getReview());
+		body.setVersion(entity.getVersion());
 		return body ;
 	}
 

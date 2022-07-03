@@ -128,6 +128,7 @@ class DynamoDbUserRatingServiceIntegrationTest {
 	private static final String RATING_DATE = "date";
 	private static final String RATING_QUANTITY = "quantity";
 	private static final String RATING_AGGREGATED = "aggregated";
+	private static final String RATING_NUMBER_OF_REVIEWS = "numberOfReviews";
 	private static final String RATING_VERSION = "version";
 	private static final String LSI_DATE = "LSIDate";
 
@@ -244,6 +245,85 @@ class DynamoDbUserRatingServiceIntegrationTest {
 				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_REVIEW, NEW_REVIEW);
 		assertAttribute(TABLE_NAME_USER_RATINGS, USER_RATING_SKU, SKU_VALUE, USER_RATING_USER,
 				"v0-" + USER2_VALUE_NO_VERSION, USER_RATING_VERSION, 1L);
+	}
+
+	@Test
+	void testPutUserRatingWithReviewSetNumberOfReviewsTo1InRatingsTable_WhenUserRatingDoesNotExist() {
+		// given
+		UserRating userRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L);
+
+		// when
+		service.put(userRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_VERSION,
+				VERSION_VALUE_3 + 1, RATING_NUMBER_OF_REVIEWS, 1);
+	}
+
+	@Test
+	void testPutUserRatingWithoutReviewSetNumberOfReviewsTo0InRatingsTable_WhenUserRatingDoesNotExist() {
+		// given
+		UserRating userRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, "",
+				1000L);
+
+		// when
+		service.put(userRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_VERSION,
+				VERSION_VALUE_3 + 1, RATING_NUMBER_OF_REVIEWS, 0);
+	}
+
+	@Test
+	void testPutUserRatingWithReviewSetNumberOfReviewsTo2InRatingsTable_WhenUserRatingWithReviewExists() {
+		// given
+		UserRating firstUserRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L);
+		UserRating secondUserRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L);
+		service.put(firstUserRating);
+
+		// when
+		service.put(secondUserRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_VERSION,
+				VERSION_VALUE_3 + 2, RATING_NUMBER_OF_REVIEWS, 2);
+	}
+
+	@Test
+	void testPutUserRatingWithoutReviewSetNumberOfReviewsTo1InRatingsTable_WhenUserRatingWithReviewExists() {
+		// given
+		UserRating firstUserRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, "",
+				1000L);
+		UserRating secondUserRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, NEW_REVIEW,
+				1000L);
+		service.put(firstUserRating);
+
+		// when
+		service.put(secondUserRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_VERSION,
+				VERSION_VALUE_3 + 2, RATING_NUMBER_OF_REVIEWS, 1);
+	}
+
+	@Test
+	void testPutUserRatingWithoutReviewSetNumberOfReviewsTo0InRatingsTable_WhenUserRatingWithoutReviewExists() {
+		// given
+		UserRating firstUserRating = createUserRating(SKU_VALUE, USER2_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, "",
+				1000L);
+		UserRating secondUserRating = createUserRating(SKU_VALUE, USER_VALUE_NO_VERSION, NEW_DATE, NEW_RATING, "",
+				1000L);
+		service.put(firstUserRating);
+
+		// when
+		service.put(secondUserRating);
+
+		// then
+		assertAttribute(TABLE_NAME_RATINGS, RATING_SKU, SKU_VALUE, RATING_VERSION,
+				VERSION_VALUE_3 + 2, RATING_NUMBER_OF_REVIEWS, 0);
 	}
 
 	@Test

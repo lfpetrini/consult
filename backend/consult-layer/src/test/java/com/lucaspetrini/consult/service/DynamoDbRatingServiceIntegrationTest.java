@@ -50,22 +50,22 @@ class DynamoDbRatingServiceIntegrationTest {
 	private static final Long AGGREGATED_VALUE_1 = 39L;
 	private static final Long DATE_VALUE_1 = 3L;
 	private static final Long QUANTITY_VALUE_1 = 7L;
-	private static final boolean HAS_REVIEWS_VALUE_1 = false;
+	private static final Long NUMBER_OF_REVIEWS_VALUE_1 = 3L;
 	private static final Long VERSION_VALUE_2 = 2L;
 	private static final Long AGGREGATED_VALUE_2 = 93L;
 	private static final Long DATE_VALUE_2 = 8L;
 	private static final Long QUANTITY_VALUE_2 = 11L;
-	private static final boolean HAS_REVIEWS_VALUE_2 = false;
+	private static final Long NUMBER_OF_REVIEWS_VALUE_2 = 7L;
 	private static final Long VERSION_VALUE_3 = 3L;
 	private static final Long DATE_VALUE_3 = 17L;
 	private static final Long AGGREGATED_VALUE_3 = 171L;
 	private static final Long QUANTITY_VALUE_3 = 19L;
-	private static final boolean HAS_REVIEWS_VALUE_3 = true;
+	private static final Long NUMBER_OF_REVIEWS_VALUE_3 = 11L;
 	private static final String TABLE_NAME_RATINGS = "ratings";
 	private static final String RATING_SKU = "sku";
 	private static final String RATING_DATE = "date";
 	private static final String RATING_QUANTITY = "quantity";
-	private static final String RATING_HAS_REVIEWS = "hasReviews";
+	private static final String RATING_NUMBER_OF_REVIEWS = "numberOfReviews";
 	private static final String RATING_AGGREGATED = "aggregated";
 	private static final String RATING_VERSION = "version";
 	private static final String LSI_DATE = "LSIDate";
@@ -108,7 +108,7 @@ class DynamoDbRatingServiceIntegrationTest {
 		assertEquals(DATE_VALUE_3, rating.getDate());
 		assertEquals(AGGREGATED_VALUE_3, rating.getAggregated());
 		assertEquals(QUANTITY_VALUE_3, rating.getQuantity());
-		assertEquals(HAS_REVIEWS_VALUE_3, rating.hasReviews());
+		assertEquals(NUMBER_OF_REVIEWS_VALUE_3, rating.getNumberOfReviews());
 		assertEquals(VERSION_VALUE_3, rating.getVersion());
 	}
 
@@ -125,7 +125,7 @@ class DynamoDbRatingServiceIntegrationTest {
 		assertEquals(DATE_VALUE_2, rating.getDate());
 		assertEquals(AGGREGATED_VALUE_2, rating.getAggregated());
 		assertEquals(QUANTITY_VALUE_2, rating.getQuantity());
-		assertEquals(HAS_REVIEWS_VALUE_2, rating.hasReviews());
+		assertEquals(NUMBER_OF_REVIEWS_VALUE_2, rating.getNumberOfReviews());
 		assertEquals(VERSION_VALUE_2, rating.getVersion());
 	}
 
@@ -175,22 +175,22 @@ class DynamoDbRatingServiceIntegrationTest {
 	private void pupulateTableRatings() throws InterruptedException, ExecutionException {
 		Map<String, Collection<WriteRequest>> requestItems = new HashMap<>();
 		Collection<WriteRequest> items = new ArrayList<>(3);
-		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_1, QUANTITY_VALUE_1, AGGREGATED_VALUE_1, HAS_REVIEWS_VALUE_1, VERSION_VALUE_1));
-		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_2, QUANTITY_VALUE_2, AGGREGATED_VALUE_2, HAS_REVIEWS_VALUE_2, VERSION_VALUE_2));
-		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_3, QUANTITY_VALUE_3, AGGREGATED_VALUE_3, HAS_REVIEWS_VALUE_3, VERSION_VALUE_3));
+		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_1, QUANTITY_VALUE_1, AGGREGATED_VALUE_1, NUMBER_OF_REVIEWS_VALUE_1, VERSION_VALUE_1));
+		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_2, QUANTITY_VALUE_2, AGGREGATED_VALUE_2, NUMBER_OF_REVIEWS_VALUE_2, VERSION_VALUE_2));
+		items.add(createRatingPutRequest(SKU_VALUE, DATE_VALUE_3, QUANTITY_VALUE_3, AGGREGATED_VALUE_3, NUMBER_OF_REVIEWS_VALUE_3, VERSION_VALUE_3));
 		requestItems.put(TABLE_NAME_RATINGS, items);
 		BatchWriteItemRequest request = BatchWriteItemRequest.builder().requestItems(requestItems).build();
 		BatchWriteItemResponse result = client.batchWriteItem(request);
 		System.out.println("Table " + TABLE_NAME_RATINGS + " fully populated: " + result.hasUnprocessedItems());
 	}
 
-	private WriteRequest createRatingPutRequest(String skuValue, Long dateValue, Long quantity, Long aggregated, boolean hasReviews,
+	private WriteRequest createRatingPutRequest(String skuValue, Long dateValue, Long quantity, Long aggregated, Long numberOfReviews,
 			Long version) {
 		Map<String, AttributeValue> attributeMap = new HashMap<>();
 		attributeMap.put(RATING_SKU, AttributeValue.builder().s(skuValue).build());
 		attributeMap.put(RATING_DATE, AttributeValue.builder().n(String.valueOf(dateValue)).build());
 		attributeMap.put(RATING_QUANTITY, AttributeValue.builder().n(String.valueOf(quantity)).build());
-		attributeMap.put(RATING_HAS_REVIEWS, AttributeValue.builder().bool(hasReviews).build());
+		attributeMap.put(RATING_NUMBER_OF_REVIEWS, AttributeValue.builder().n(String.valueOf(numberOfReviews)).build());
 		attributeMap.put(RATING_AGGREGATED, AttributeValue.builder().n(String.valueOf(aggregated)).build());
 		attributeMap.put(RATING_VERSION, AttributeValue.builder().n(String.valueOf(version)).build());
 		PutRequest putRequest = PutRequest.builder().item(attributeMap).build();

@@ -152,12 +152,14 @@ public class DynamoDbUserRatingService implements UserRatingService {
 			}
 
 			rating = new Rating();
+			long reviewIncrement = newUserRating.getReview() != null && !newUserRating.getReview().isBlank() ? 1 : 0;
 			rating.setSku(userRating.getSku());
 			if(currentRating == null) {
 				rating.setAggregated(userRating.getRating());
 				rating.setQuantity(1L);
 				rating.setDate(userRating.getDate());
 				rating.setVersion(1L);
+				rating.setNumberOfReviews(reviewIncrement);
 				addToTransaction(transactWriteRequestBuilder, ratingsTable, rating);
 			}
 			else {
@@ -172,6 +174,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 					rating.setQuantity(currentRating.getQuantity());
 					rating.setAggregated(currentRating.getAggregated() - currentUserRating.getRating() + userRating.getRating());
 				}
+				rating.setNumberOfReviews((currentRating.getNumberOfReviews() == null ? 0 : currentRating.getNumberOfReviews()) + reviewIncrement);
 				addToTransaction(transactWriteRequestBuilder, ratingsTable, rating);
 			}
 			dynamoDbEnhancedClient.transactWriteItems(transactWriteRequestBuilder.build());
