@@ -18,11 +18,11 @@ import com.lucaspetrini.consult.utils.ConsultConstants;
 public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<GetRatingRequest, GetRatingResponse> {
 
 	private RatingService ratingService;
-	
+
 	/**
 	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
 	 * {@link RatingService}.
-	 * 
+	 *
 	 * @param ratingService rating service.
 	 */
 	public ConsultRatingGetRequestHandler() {}
@@ -30,7 +30,7 @@ public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<Get
 	/**
 	 * Default implementation of {@link ConsultRequestHandler} that delegates requests to an underlying
 	 * {@link RatingService}.
-	 * 
+	 *
 	 * @param ratingService rating service.
 	 */
 	public ConsultRatingGetRequestHandler(RatingService ratingService) {
@@ -43,6 +43,7 @@ public class ConsultRatingGetRequestHandler implements ConsultRequestHandler<Get
 		body.setDate(entity.getDate());
 		body.setQuantity(entity.getQuantity());
 		body.setAggregated(entity.getAggregated());
+		body.setNumberOfReviews(entity.getNumberOfReviews());
 		body.setVersion(entity.getVersion());
 		return body;
 	}

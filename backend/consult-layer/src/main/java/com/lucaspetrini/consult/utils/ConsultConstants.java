@@ -11,6 +11,8 @@ public final class ConsultConstants {
 	public static final String UNHANDLED_EXCEPTION_ERROR_DESC = "Internal server error.";
 	public static final String PATH_PARAM_USER_ID = "id";
 	public static final String PATH_PARAM_CODE = "code";
+	public static final String CONTEXT_AUTHORIZATION_JWT_USER = "AuthorizationJwtUser";
+	public static final String JWT_CLAIM_USERNAME = "username";
 
 	private ConsultConstants() {}
 }

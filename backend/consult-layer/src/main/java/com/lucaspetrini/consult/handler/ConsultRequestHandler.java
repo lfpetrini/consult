@@ -13,8 +13,8 @@ public interface ConsultRequestHandler<I, O> {
 
 	/**
 	 * Process an HTTP request.
-	 * @param request
-	 * @return
+	 * @param request request.
+	 * @return response.
 	 */
 	HttpResponse<O> handle(HttpRequest<I> request);
 

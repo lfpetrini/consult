@@ -42,6 +42,7 @@ public class ConsultRatingGetRequestHandlerTest {
 	private static final Rating RATING;
 	private static final Long AGGREGATED = 19L;
 	private static final Long DATE = 5513564L;
+	private static final Long NUMBER_OF_REVIEWS = 3L;
 	private static final Long VERSION = 3L;
 
 	static {
@@ -50,6 +51,7 @@ public class ConsultRatingGetRequestHandlerTest {
 		RATING.setQuantity(QUANTITY);
 		RATING.setAggregated(AGGREGATED);
 		RATING.setDate(DATE);
+		RATING.setNumberOfReviews(NUMBER_OF_REVIEWS);
 		RATING.setVersion(VERSION);
 	}
 
@@ -109,6 +111,7 @@ public class ConsultRatingGetRequestHandlerTest {
 		assertEquals(QUANTITY, responseBody.getQuantity());
 		assertEquals(AGGREGATED, responseBody.getAggregated());
 		assertEquals(DATE, responseBody.getDate());
+		assertEquals(NUMBER_OF_REVIEWS, responseBody.getNumberOfReviews());
 		assertEquals(VERSION, responseBody.getVersion());
 	}
 
@@ -148,7 +151,7 @@ public class ConsultRatingGetRequestHandlerTest {
 		doReturn(null).when(service).getByCode(any());
 
 		// then
-		assertThrows(ResourceNotFoundException.class, () -> { 
+		assertThrows(ResourceNotFoundException.class, () -> {
 			// when
 			handler.handle(request);
 		});

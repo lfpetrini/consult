@@ -161,6 +161,7 @@ Resources:
       UserPoolId: !Ref ConsultUserPool
   ConsultUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
+    DependsOn: ConsultUserPoolResourceServer
     Properties: 
       #AccessTokenValidity: Integer
       AllowedOAuthFlows: 
@@ -168,6 +169,7 @@ Resources:
       AllowedOAuthScopes: 
         - openid
         - consult/write_rating
+      AllowedOAuthFlowsUserPoolClient: true
       CallbackURLs: 
         - !Ref CognitoCallbakURL
       #ClientName: String
@@ -198,7 +200,7 @@ Resources:
             AuthorizationScopes:
               - consult/write_rating
             JwtConfiguration:
-              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/{ConsultUserPool}"
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${ConsultUserPool}"
                 #- UserPoolId: !Ref ConsultUserPool
               audience:
                 - !Ref ConsultUserPoolClient

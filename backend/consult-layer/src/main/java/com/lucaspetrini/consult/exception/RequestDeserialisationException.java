@@ -8,7 +8,7 @@ public class RequestDeserialisationException extends ServiceException {
 
 	/**
 	 * Request deserialisation exception.
-	 * 
+	 *
 	 * @param cause cause of this exception.
 	 */
 	public RequestDeserialisationException(Throwable cause) {
@@ -17,8 +17,8 @@ public class RequestDeserialisationException extends ServiceException {
 
 	/**
 	 * Request deserialisation exception.
-	 * 
-	 * @param short description of the issue.
+	 *
+	 * @param message short description of the issue.
 	 */
 	public RequestDeserialisationException(String message) {
 		super(message, 400);
@@ -26,9 +26,9 @@ public class RequestDeserialisationException extends ServiceException {
 
 	/**
 	 * Request deserialisation exception.
-	 * 
+	 *
 	 * @param cause cause of this exception.
-	 * @param short description of the issue.
+	 * @param message short description of the issue.
 	 */
 	public RequestDeserialisationException(Throwable cause, String message) {
 		super(cause, message, 400);

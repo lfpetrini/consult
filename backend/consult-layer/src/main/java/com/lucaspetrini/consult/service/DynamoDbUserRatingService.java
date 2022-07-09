@@ -47,7 +47,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 	/**
 	 * Implementation of {@link UserRatingService} that stores and retrieves {@link UserRating user ratings}
 	 * from Amazon DynamoDB.
-	 * 
+	 *
 	 * @param dynamoDbClient underlying {@link DynamoDbClient}.
 	 */
 	public DynamoDbUserRatingService(DynamoDbClient dynamoDbClient) {
@@ -67,7 +67,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 
 	/**
 	 * Set the table name to be used for {@link UserRating user ratings}.
-	 * 
+	 *
 	 * @param userRatingsTable table name.
 	 * @return this {@link DynamoDbUserRatingService} instance.
 	 */
@@ -79,7 +79,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 
 	/**
 	 * Set the table name to be used for {@link Rating ratings}.
-	 * 
+	 *
 	 * @param ratingsTable table name.
 	 * @return this {@link DynamoDbUserRatingService} instance.
 	 */
@@ -152,14 +152,14 @@ public class DynamoDbUserRatingService implements UserRatingService {
 			}
 
 			rating = new Rating();
-			long reviewIncrement = newUserRating.getReview() != null && !newUserRating.getReview().isBlank() ? 1 : 0;
+			long reviewIncrement = getReviewIncrement(currentUserRating, newUserRating);
 			rating.setSku(userRating.getSku());
 			if(currentRating == null) {
 				rating.setAggregated(userRating.getRating());
 				rating.setQuantity(1L);
 				rating.setDate(userRating.getDate());
 				rating.setVersion(1L);
-				rating.setNumberOfReviews(reviewIncrement);
+				rating.setNumberOfReviews(Math.max(0, reviewIncrement));
 				addToTransaction(transactWriteRequestBuilder, ratingsTable, rating);
 			}
 			else {
@@ -174,7 +174,8 @@ public class DynamoDbUserRatingService implements UserRatingService {
 					rating.setQuantity(currentRating.getQuantity());
 					rating.setAggregated(currentRating.getAggregated() - currentUserRating.getRating() + userRating.getRating());
 				}
-				rating.setNumberOfReviews((currentRating.getNumberOfReviews() == null ? 0 : currentRating.getNumberOfReviews()) + reviewIncrement);
+				// if for any weird reason number of reviews result in less than 0, we set it to 0
+				rating.setNumberOfReviews(Math.max(0, (currentRating.getNumberOfReviews() == null ? 0 : currentRating.getNumberOfReviews()) + reviewIncrement));
 				addToTransaction(transactWriteRequestBuilder, ratingsTable, rating);
 			}
 			dynamoDbEnhancedClient.transactWriteItems(transactWriteRequestBuilder.build());
@@ -184,6 +185,22 @@ public class DynamoDbUserRatingService implements UserRatingService {
 		}
 		newUserRating.setUser(userRating.getUser());
 		return newUserRating;
+	}
+
+	/**
+	 * If current user rating contains a review and new user rating doesn't, increment is -1;<br>
+	 * If current user rating contains a review and new user rating also does, increment is 0;<br>
+	 * If current user rating doesn't contain a review and new user rating doesn't, increment is 0;<br>
+	 * If current user rating doesn't contain a review and new user rating does, increment is 1;<br>
+	 *
+	 * @param currentUserRating current user rating.
+	 * @param newUserRating user rating being added in the database. Must not be null.
+	 * @return the value that should be used to increment numberOfReviews in ratings table.
+	 */
+	private int getReviewIncrement(UserRating currentUserRating, UserRating newUserRating) {
+		int currentNumberOfReview = currentUserRating != null && currentUserRating.getReview() != null && !currentUserRating.getReview().isBlank() ? 1 : 0;
+		int newNumberOfReview = newUserRating.getReview() != null && !newUserRating.getReview().isBlank() ? 1 : 0;
+		return newNumberOfReview - currentNumberOfReview;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -202,7 +219,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 
 	/**
 	 * Return a new {@link UserRating} instance identical to the one passed as parameter.
-	 * 
+	 *
 	 * @param userRating instance to clone.
 	 * @return cloned user rating.
 	 */
@@ -221,7 +238,7 @@ public class DynamoDbUserRatingService implements UserRatingService {
 
 	/**
 	 * Get a single item from the database.
-	 * 
+	 *
 	 * @param code user rating code.
 	 * @param user user rating user id.
 	 * @return item, or null if it doesn't exist.

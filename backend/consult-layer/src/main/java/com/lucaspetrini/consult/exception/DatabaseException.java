@@ -8,7 +8,7 @@ public class DatabaseException extends ServiceException {
 
 	/**
 	 * Database issue exception.
-	 * 
+	 *
 	 * @param cause cause of this exception.
 	 */
 	public DatabaseException(Throwable cause) {
@@ -17,8 +17,8 @@ public class DatabaseException extends ServiceException {
 
 	/**
 	 * Database issue exception.
-	 * 
-	 * @param short description of the issue.
+	 *
+	 * @param message short description of the issue.
 	 */
 	public DatabaseException(String message) {
 		super(message, 500);
@@ -26,9 +26,9 @@ public class DatabaseException extends ServiceException {
 
 	/**
 	 * Database issue exception.
-	 * 
+	 *
 	 * @param cause cause of this exception.
-	 * @param short description of the issue.
+	 * @param message short description of the issue.
 	 */
 	public DatabaseException(Throwable cause, String message) {
 		super(cause, message, 500);

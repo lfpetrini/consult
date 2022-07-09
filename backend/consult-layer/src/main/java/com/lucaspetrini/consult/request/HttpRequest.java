@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * Base class for http requests.
- * 
+ *
  * @param <T> type of the request body.
  */
 public class HttpRequest<T> {
@@ -12,6 +12,7 @@ public class HttpRequest<T> {
 	private T requestBody;
 	private Map<String, String> headers;
 	private Map<String, String> pathParams;
+	private Map<String, String> context;
 
 	public T getBody() {
 		return requestBody;
@@ -35,6 +36,14 @@ public class HttpRequest<T> {
 
 	public Map<String, String> getPathParams() {
 		return pathParams;
+	}
+
+	public void setContext(Map<String, String> context) {
+		this.context = context;
+	}
+
+	public Map<String, String> getContext() {
+		return context;
 	}
 
 }

@@ -38,7 +38,7 @@ import com.lucaspetrini.consult.response.PutUserRatingResponse;
 import com.lucaspetrini.consult.utils.ConsultConstants;
 
 /**
- * Test {@link UserRatingHandler}.
+ * Test {@link AbstractRequestHandler}.
  */
 @ExtendWith(MockitoExtension.class)
 public class UserRatingHandlerTest {
@@ -56,7 +56,7 @@ public class UserRatingHandlerTest {
 	private static final String CUSTOM_HEADER = "cupcake";
 	private static final String CUSTOM_HEADER_VALUE = "chocolate";
 
-	private UserRatingHandler handler;
+	private AbstractRequestHandler handler;
 	private @Mock ObjectMapper objectMapper;
 	private @Mock ConsultRequestHandler<PutUserRatingRequest, PutUserRatingResponse> requestHandlerPut;
 	private @Mock ConsultRequestHandler<GetUserRatingRequest, GetUserRatingResponse> requestHandlerGet;
@@ -226,7 +226,7 @@ public class UserRatingHandlerTest {
 	public void testValidDefaultResponseHeadersAreReturned_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		HttpResponse<GetUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setHeaders(null);
 		response.setStatusCode(200);
 		doReturn(response).when(requestHandlerGet).handle(any());
@@ -244,7 +244,7 @@ public class UserRatingHandlerTest {
 	public void testValidDefaultResponseHeadersAreReturned_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		HttpResponse<PutUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<PutUserRatingResponse> response = new HttpResponse<>();
 		response.setHeaders(null);
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandlerPut).handle(any());
@@ -262,7 +262,7 @@ public class UserRatingHandlerTest {
 	public void testCustomResponseHeadersAreMergedWithDefault_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		HttpResponse<PutUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<PutUserRatingResponse> response = new HttpResponse<>();
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandlerPut).handle(any());
@@ -282,7 +282,7 @@ public class UserRatingHandlerTest {
 	public void testCustomResponseHeadersOverrideDefault_ForPut() {
 		// given
 		input = createInput("PUT", null, "{}");
-		HttpResponse<PutUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<PutUserRatingResponse> response = new HttpResponse<>();
 		Map<String, String> headers = new HashMap<>();
 		headers.put(CUSTOM_HEADER, CUSTOM_HEADER_VALUE);
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);		response.setHeaders(headers);
@@ -303,7 +303,7 @@ public class UserRatingHandlerTest {
 	public void testCustomResponseHeadersAreMergedWithDefault_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		HttpResponse<GetUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		response.setHeaders(Collections.singletonMap(CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
 		response.setStatusCode(201);
 		doReturn(response).when(requestHandlerGet).handle(any());
@@ -323,7 +323,7 @@ public class UserRatingHandlerTest {
 	public void testCustomResponseHeadersOverrideDefault_ForGet() {
 		// given
 		input = createInput("GET", null, "{}");
-		HttpResponse<GetUserRatingRequest> response = new HttpResponse<>();
+		HttpResponse<GetUserRatingResponse> response = new HttpResponse<>();
 		Map<String, String> headers = new HashMap<>();
 		headers.put(CUSTOM_HEADER, CUSTOM_HEADER_VALUE);
 		headers.put(ConsultConstants.HEADER_CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);

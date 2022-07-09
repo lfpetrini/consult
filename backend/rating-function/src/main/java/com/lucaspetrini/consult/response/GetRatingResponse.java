@@ -9,7 +9,8 @@ public class GetRatingResponse {
 	private Long aggregated;
 	private Long quantity;
 	private Long version;
-	
+	private Long numberOfReviews;
+
 	public String getCode() {
 		return code;
 	}
@@ -48,5 +49,13 @@ public class GetRatingResponse {
 
 	public void setVersion(Long version) {
 		this.version = version;
+	}
+
+	public Long getNumberOfReviews() {
+		return numberOfReviews;
+	}
+
+	public void setNumberOfReviews(Long numberOfReviews) {
+		this.numberOfReviews = numberOfReviews;
 	}
 }

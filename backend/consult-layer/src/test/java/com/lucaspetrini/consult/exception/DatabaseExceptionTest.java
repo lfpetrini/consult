@@ -1,11 +1,8 @@
-package com.lucaspetrini.consult.mapper;
+package com.lucaspetrini.consult.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-
-import com.lucaspetrini.consult.exception.DatabaseException;
-import com.lucaspetrini.consult.exception.UnsupportedMethodException;
 
 /**
  * Test {@link DatabaseException}.
