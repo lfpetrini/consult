@@ -119,6 +119,9 @@ Resources:
         RecoveryMechanisms:
           - Name: verified_email
             Priority: 1 # Documentation says it's not mandatory, but deployment fails when not explicitly set
+      # Automatically send verification email on signup
+      AutoVerifiedAttributes:
+        - email
       AdminCreateUserConfig: 
           AllowAdminCreateUserOnly: false
       MfaConfiguration: "OFF"
