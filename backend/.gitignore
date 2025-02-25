@@ -12,7 +12,6 @@ hs_err_pid*
 # Maven build
 target/
 */target/
-**/native-libs
 dependency-reduced-pom.xml
 */dependency-reduced-pom.xml
 
